@@ -6,7 +6,9 @@ import { render, createContext, useContext } from '@wordpress/element';
 
 /* Library */
 import { map, isEmpty } from 'lodash';
-
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import { theme } from './theme'; 
 /*Atrc*/
 import {
     AtrcHashRouter,
@@ -17,6 +19,7 @@ import {
     AtrcWrapFloating,
     AtrcMain
 } from 'atrc';
+
 
 import { AtrcApplyWithSettings } from 'atrc/build/data';
 
@@ -117,7 +120,7 @@ const InitLocalStorageSettings = (props) => {
     };
     return (
         <InitDataBaseSettingsWithHoc
-            atrcStore={WpReactPluginBoilerplateLocalize.store}//store from AtrcRegisterStore
+            atrcStore={RestaurantManagementSystemLocalize.store}//store from AtrcRegisterStore
             atrcStoreKey='settings'//key from admin.js
             lsSettings={settings || defaultSettings}
             lsUpdateSetting={updateSetting}
@@ -130,16 +133,16 @@ const InitLocalStorageSettingsWithHoc = AtrcApplyWithSettings(
 );
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if the root element exists in the DOM
-    const rootElement = document.getElementById(WpReactPluginBoilerplateLocalize.root_id);
+    const rootElement = document.getElementById(RestaurantManagementSystemLocalize.root_id);
 
     if (rootElement) {
-        // Render the component into the root element
         render(
-            <InitLocalStorageSettingsWithHoc
-                atrcStore={WpReactPluginBoilerplateLocalize.store} //store from AtrcRegisterStore
-                atrcStoreKey='WpReactPluginBoilerplateLocal'//key from admin.js
-            />,
+            <MantineProvider theme={theme}>
+                <InitLocalStorageSettingsWithHoc
+                    atrcStore={RestaurantManagementSystemLocalize.store}
+                    atrcStoreKey='RestaurantManagementSystemLocal'
+                />
+            </MantineProvider>,
             rootElement
         );
     }
