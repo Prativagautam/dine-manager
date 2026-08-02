@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @link       https://www.acmeit.org/
  * @since      1.0.0
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes/api
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes/api
  */
 
 /**
@@ -19,31 +19,31 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Define namespace, vresion and other common properties and methods.
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes/api
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes/api
  * @author     codersantosh <codersantosh@gmail.com>
  */
-if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api' ) ) {
+if ( ! class_exists( 'Restaurant_Management_System_Api' ) ) {
 
 	/**
-	 * Wp_React_Plugin_Boilerplate_Api
+	 * Restaurant_Management_System_Api
 	 *
-	 * @package Wp_React_Plugin_Boilerplate
+	 * @package Restaurant_Management_System
 	 * @since 1.0.1
 	 */
-	class Wp_React_Plugin_Boilerplate_Api extends WP_REST_Controller {
+	class Restaurant_Management_System_Api extends WP_REST_Controller {
 
 		/**
 		 * Rest route namespace.
 		 *
-		 * @var Wp_React_Plugin_Boilerplate_Api
+		 * @var Restaurant_Management_System_Api
 		 */
-		public $namespace = 'wp-react-plugin-boilerplate/';
+		public $namespace = 'restaurant-management-system/';
 
 		/**
 		 * Rest route version.
 		 *
-		 * @var Wp_React_Plugin_Boilerplate_Api
+		 * @var Restaurant_Management_System_Api
 		 */
 		public $version = 'v1';
 
@@ -112,7 +112,7 @@ if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api' ) ) {
 		 */
 		public function __clone() {
 			// Cloning instances of the class is forbidden.
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'wp-react-plugin-boilerplate' ), '1.0.0' );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'restaurant-management-system' ), '1.0.0' );
 		}
 
 		/**
@@ -124,7 +124,7 @@ if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api' ) ) {
 		 */
 		public function __wakeup() {
 			// Unserializing instances of the class is forbidden.
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'wp-react-plugin-boilerplate' ), '1.0.0' );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'Cheatin&#8217; huh?', 'restaurant-management-system' ), '1.0.0' );
 		}
 	}
 }

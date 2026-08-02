@@ -14,7 +14,7 @@ import { AtrcReduxContextData } from '../../routes';
 const Landing = () => {
 	const data = useContext(AtrcReduxContextData);
 	const { lsSettings, lsSaveSettings } = data;
-	const { white_label: dynamicWhitelabel } = WpReactPluginBoilerplateLocalize;
+	const { white_label: dynamicWhitelabel } = RestaurantManagementSystemLocalize;
 	const { dashboard, landingPage } = dynamicWhitelabel;
 
 	const whiteLabel = {};

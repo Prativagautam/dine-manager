@@ -21,9 +21,9 @@ const SaveSettings = ({ onClick }) => {
 				isLoading={dbIsLoading}
 				canSave={dbCanSave}
 				text={{
-					saved: __('Saved', 'wp-react-plugin-boilerplate'),
-					save: __('Save settings', 'wp-react-plugin-boilerplate'),
-					saving: __('Saving', 'wp-react-plugin-boilerplate'),
+					saved: __('Saved', 'restaurant-management-system'),
+					save: __('Save settings', 'restaurant-management-system'),
+					saving: __('Saving', 'restaurant-management-system'),
 				}}
 				disabled={dbIsLoading || !dbCanSave}
 				onClick={() => dbSaveSettings(dbSettings)}

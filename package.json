@@ -1,5 +1,5 @@
 {
-	"name": "wp-react-plugin-boilerplate",
+	"name": "restaurant-management-system",
 	"version": "1.0.0",
 	"description": "WP React Plugin Boilerplate - WordPress Setting via React and Rest API",
 	"author": "codersantosh",
@@ -14,7 +14,7 @@
 		"start": "npm-run-all --parallel start:admin start:public",
 		"packages-update": "wp-scripts packages-update",
 		"makejsstring": "node .bin/make-string.js",
-		"makepot": "wp i18n make-pot . languages/wp-react-plugin-boilerplate.pot --skip-js --exclude=src,vendor,node_modules --merge=languages/js.pot",
+		"makepot": "wp i18n make-pot . languages/restaurant-management-system.pot --skip-js --exclude=src,vendor,node_modules --merge=languages/js.pot",
 		"copy": "node .bin/copy.js",
 		"replaceAtrc": "node .bin/replace-atrc.js",
 		"deploy": "npm-run-all build replaceAtrc makepot copy",
@@ -29,6 +29,8 @@
 		"replace-in-file": "^7.2.0"
 	},
 	"dependencies": {
+		"@mantine/core": "^8.3.18",
+		"@mantine/hooks": "^8.3.18",
 		"@wordpress/components": "^29.5.0",
 		"@wordpress/url": "^4.19.0",
 		"atrc": "^1.0.35",

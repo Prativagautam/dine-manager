@@ -22,14 +22,14 @@ const options = {
         /Wp_React_Plugin_Boilerplate/g,
         /WpReactPluginBoilerplate/g,
     ],
-    to: [
-        'your-renamed-plugin',/******************** replace with your plugin details */
-        'your_renamed_plugin',
-        'YOUR_RENAMED_PLUGIN',
-        'YOUR-RENAMED-PLUGIN',
-        'Your-Renamed-Plugin',
-        'Your_Renamed_Plugin',
-        'YourRenamedPlugin',
+  to: [
+        'restaurant-management-system',
+        'restaurant_management_system',
+        'RESTAURANT_MANAGEMENT_SYSTEM',
+        'RESTAURANT-MANAGEMENT-SYSTEM',
+        'Restaurant-Management-System',
+        'Restaurant_Management_System',
+        'RestaurantManagementSystem',
     ],
     verbose: true,
     dry: false,
@@ -45,7 +45,7 @@ async function renamePHPFiles() {
             const baseName = path.basename(file);
             const newBaseName = baseName.replace(
                 /wp-react-plugin-boilerplate/gi,
-                'your-renamed-plugin'/******************** replace with your plugin details */
+                'restaurant-management-system'/******************** replace with your plugin details */
             );
             const newFileName = path.join(dir, newBaseName);
 

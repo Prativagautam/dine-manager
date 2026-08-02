@@ -9,29 +9,29 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @link       https://www.acmeit.org/
  * @since      1.0.0
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/Wp_React_Plugin_Boilerplate_Api_Settings
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/Restaurant_Management_System_Api_Settings
  */
 
 /**
  * Plugin's settings via the REST API.
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/Wp_React_Plugin_Boilerplate_Api_Settings
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/Restaurant_Management_System_Api_Settings
  * @author     codersantosh <codersantosh@gmail.com>
  *
- * @see Wp_React_Plugin_Boilerplate_Api
+ * @see Restaurant_Management_System_Api
  */
-if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api_Settings' ) ) {
+if ( ! class_exists( 'Restaurant_Management_System_Api_Settings' ) ) {
 
 	/**
-	 * Wp_React_Plugin_Boilerplate_Api_Settings
+	 * Restaurant_Management_System_Api_Settings
 	 *
 	 * @see WP_REST_Settings_Controller
-	 * @package Wp_React_Plugin_Boilerplate
+	 * @package Restaurant_Management_System
 	 * @since 1.0.0
 	 */
-	class Wp_React_Plugin_Boilerplate_Api_Settings extends Wp_React_Plugin_Boilerplate_Api {
+	class Restaurant_Management_System_Api_Settings extends Restaurant_Management_System_Api {
 
 		/**
 		 * Initialize the class and set up actions.
@@ -40,7 +40,7 @@ if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api_Settings' ) ) {
 		 * @return void
 		 */
 		public function run() {
-			$this->type      = 'wp_react_plugin_boilerplate_api_settings';
+			$this->type      = 'restaurant_management_system_api_settings';
 			$this->rest_base = 'settings';
 
 			/*Custom Rest Routes*/
@@ -99,7 +99,7 @@ if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api_Settings' ) ) {
 		public function get_item( $request ) {
 			$response = array();
 
-			$saved_options = wp_react_plugin_boilerplate_get_options();
+			$saved_options = restaurant_management_system_get_options();
 
 			$schema = $this->get_registered_schema();
 
@@ -141,13 +141,13 @@ if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api_Settings' ) ) {
 				return new WP_Error(
 					'rest_invalid_stored_value',
 					/* translators: %s: Property name. */
-					sprintf( __( 'The %s property has an invalid stored value, and cannot be updated to null.', 'wp-react-plugin-boilerplate' ), WP_REACT_PLUGIN_BOILERPLATE_OPTION_NAME ),
+					sprintf( __( 'The %s property has an invalid stored value, and cannot be updated to null.', 'restaurant-management-system' ), RESTAURANT_MANAGEMENT_SYSTEM_OPTION_NAME ),
 					array( 'status' => 500 )
 				);
 			}
 
 			$sanitized_options = $this->prepare_value( $params, $schema );
-			wp_react_plugin_boilerplate_update_options( $sanitized_options );
+			restaurant_management_system_update_options( $sanitized_options );
 
 			return $this->get_item( $request );
 		}
@@ -169,7 +169,7 @@ if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api_Settings' ) ) {
 			}
 
 			// If not cached, fetch the value and cache it.
-			$schema = wp_react_plugin_boilerplate_admin()->get_settings_schema();
+			$schema = restaurant_management_system_admin()->get_settings_schema();
 
 			// Cache the schema in the static variable.
 			$cached_schema = $schema;
@@ -229,13 +229,13 @@ if ( ! class_exists( 'Wp_React_Plugin_Boilerplate_Api_Settings' ) ) {
 }
 
 /**
- * Return instance of  Wp_React_Plugin_Boilerplate_Api_Settings class
+ * Return instance of  Restaurant_Management_System_Api_Settings class
  *
  * @since 1.0.0
  *
- * @return Wp_React_Plugin_Boilerplate_Api_Settings
+ * @return Restaurant_Management_System_Api_Settings
  */
-function wp_react_plugin_boilerplate_api_settings() { //phpcs:ignore
-	return Wp_React_Plugin_Boilerplate_Api_Settings::get_instance();
+function restaurant_management_system_api_settings() { //phpcs:ignore
+	return Restaurant_Management_System_Api_Settings::get_instance();
 }
-wp_react_plugin_boilerplate_api_settings()->run();
+restaurant_management_system_api_settings()->run();

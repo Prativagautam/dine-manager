@@ -12,7 +12,7 @@ import { AtrcTitleTemplate2 } from 'atrc';
 const DocsTitle = ({ onClick }) => {
 	return (
 		<AtrcTitleTemplate2
-			title={__('Documentation', 'wp-react-plugin-boilerplate')}
+			title={__('Documentation', 'restaurant-management-system')}
 			buttons={[
 				{
 					iconProps: {

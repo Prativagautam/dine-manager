@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @link       https://www.acmeit.org/
  * @since      1.0.0
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes
  */
 
 /**
@@ -20,11 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes
  * @author     codersantosh <codersantosh@gmail.com>
  */
-class Wp_React_Plugin_Boilerplate_Loader {
+class Restaurant_Management_System_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.

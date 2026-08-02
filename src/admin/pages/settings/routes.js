@@ -74,15 +74,15 @@ const InitSettings = () => {
                     navs={[
                         {
                             to: 'setting1',
-                            children: __('Settings 1', 'wp-react-plugin-boilerplate'),
+                            children: __('Settings 1', 'restaurant-management-system'),
                         },
                         {
                             to: 'setting2',
-                            children: __('Settings 2', 'wp-react-plugin-boilerplate'),
+                            children: __('Settings 2', 'restaurant-management-system'),
                         },
                         {
                             to: 'advanced',
-                            children: __('Advanced', 'wp-react-plugin-boilerplate'),
+                            children: __('Advanced', 'restaurant-management-system'),
                         },
                     ]}
                 />

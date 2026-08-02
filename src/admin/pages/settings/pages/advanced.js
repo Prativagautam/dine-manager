@@ -37,7 +37,7 @@ const MainContent = () => {
                 <AtrcControlToggle
                     label={__(
                         'Remove all plugin settings when deactivating.',
-                        'wp-react-plugin-boilerplate'
+                        'restaurant-management-system'
                     )}
                     checked={deleteAll}
                     onChange={() => dbUpdateSetting('deleteAll', !deleteAll)}
@@ -72,7 +72,7 @@ const Documentation = () => {
                         className={classNames(AtrcPrefix('m-0'))}
                         title={__(
                             'What does "Remove all plugin settings when deactivating" do?',
-                            'wp-react-plugin-boilerplate'
+                            'restaurant-management-system'
                         )}
                         initialOpen={true}>
                         <AtrcText
@@ -80,19 +80,19 @@ const Documentation = () => {
                             className={classNames(AtrcPrefix('m-0'), 'at-m')}>
                             {__(
                                 'Enabling this option will erase all settings associated with the plugin from the WordPress options table. However, please note that the selected page will not be deleted from Pages.',
-                                'wp-react-plugin-boilerplate'
+                                'restaurant-management-system'
                             )}
                         </AtrcText>
                     </AtrcPanelBody>
                     <AtrcPanelBody
-                        title={__('Do I need to activate this option?', 'wp-react-plugin-boilerplate')}
+                        title={__('Do I need to activate this option?', 'restaurant-management-system')}
                         initialOpen={false}>
                         <AtrcText
                             tag='p'
                             className={classNames(AtrcPrefix('m-0'), 'at-m')}>
                             {__(
                                 'If you anticipate using the `Login feature` in the future, no need to activate it.',
-                                'wp-react-plugin-boilerplate'
+                                'restaurant-management-system'
                             )}
                         </AtrcText>
                     </AtrcPanelBody>
@@ -118,7 +118,7 @@ const Settings = () => {
                 className: classNames(AtrcPrefix('bg-white'), 'at-bg-cl'),
             }}
             renderHeader={
-                <AtrcTitleTemplate1 title={__('Advanced', 'wp-react-plugin-boilerplate')} />
+                <AtrcTitleTemplate1 title={__('Advanced', 'restaurant-management-system')} />
             }
             renderContent={
                 <AtrcWireFrameContentSidebar

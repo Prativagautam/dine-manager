@@ -21,12 +21,12 @@ const AdminHeader = () => {
     const primaryNav = [
         {
             to: '/',
-            children: __('Getting started', 'wp-react-plugin-boilerplate'),
+            children: __('Getting started', 'restaurant-management-system'),
             end: true,
         },
         {
             to: '/settings',
-            children: __('Settings', 'wp-react-plugin-boilerplate'),
+            children: __('Settings', 'restaurant-management-system'),
         },
     ];
 
@@ -34,7 +34,7 @@ const AdminHeader = () => {
         <AtrcHeaderTemplate1
             isSticky
             logo={{
-                src: WpReactPluginBoilerplateLocalize.white_label.dashboard.logo,
+                src: RestaurantManagementSystemLocalize.white_label.dashboard.logo,
             }}
             primaryNav={{
                 navs: primaryNav,
@@ -46,7 +46,7 @@ const AdminHeader = () => {
                         onClick={() => lsSaveSettings(null)}>
                         {__(
                             'Show all hidden informations, notices and documentations ',
-                            'wp-react-plugin-boilerplate'
+                            'restaurant-management-system'
                         )}
                     </AtrcButton>
                 </AtrcWrap>

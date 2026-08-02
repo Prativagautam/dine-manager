@@ -2,7 +2,7 @@
 /**
  * Includes necessary files
  *
- * @package Wp_React_Plugin_Boilerplate
+ * @package Restaurant_Management_System
  * @since 1.0.0
  */
 
