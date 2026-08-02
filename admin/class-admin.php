@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @link       https://www.acmeit.org/
  * @since      1.0.0
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/admin
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/admin
  */
 
 /**
@@ -20,11 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/admin
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/admin
  * @author     codersantosh <codersantosh@gmail.com>
  */
-class Wp_React_Plugin_Boilerplate_Admin {
+class Restaurant_Management_System_Admin {
 
 	/**
 	 * Menu info.
@@ -66,7 +66,7 @@ class Wp_React_Plugin_Boilerplate_Admin {
 	 */
 	public function add_admin_menu() {
 
-		$white_label     = wp_react_plugin_boilerplate_include()->get_white_label();
+		$white_label     = restaurant_management_system_include()->get_white_label();
 		$this->menu_info = $white_label['admin_menu_page'];
 
 		add_menu_page(
@@ -90,7 +90,7 @@ class Wp_React_Plugin_Boilerplate_Admin {
 	 */
 	public function is_menu_page() {
 		$screen              = get_current_screen();
-		$admin_scripts_bases = array( 'toplevel_page_' . WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME );
+		$admin_scripts_bases = array( 'toplevel_page_' . RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME );
 		if ( ! ( isset( $screen->base ) && in_array( $screen->base, $admin_scripts_bases, true ) ) ) {
 			return false;
 		}
@@ -122,7 +122,7 @@ class Wp_React_Plugin_Boilerplate_Admin {
 	 * @since    1.0.0
 	 */
 	public function add_setting_root_div() {
-		echo '<div id="' . esc_attr( WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME ) . '"></div>';
+		echo '<div id="' . esc_attr( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME ) . '"></div>';
 	}
 
 	/**
@@ -144,11 +144,11 @@ class Wp_React_Plugin_Boilerplate_Admin {
 		wp_style_add_data( 'atomic', 'rtl', 'replace' );
 
 		/*Scripts dependency files*/
-		$deps_file = WP_REACT_PLUGIN_BOILERPLATE_PATH . 'build/admin/index.asset.php';
+		$deps_file = RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'build/admin/index.asset.php';
 
 		/*Fallback dependency array*/
 		$dependency = array();
-		$version    = WP_REACT_PLUGIN_BOILERPLATE_VERSION;
+		$version    = RESTAURANT_MANAGEMENT_SYSTEM_VERSION;
 
 		/*Set dependency and version*/
 		if ( file_exists( $deps_file ) ) {
@@ -157,27 +157,27 @@ class Wp_React_Plugin_Boilerplate_Admin {
 			$version    = $deps_file['version'];
 		}
 
-		wp_enqueue_script( WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME, WP_REACT_PLUGIN_BOILERPLATE_URL . 'build/admin/index.js', $dependency, $version, true );
+		wp_enqueue_script( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME, RESTAURANT_MANAGEMENT_SYSTEM_URL . 'build/admin/index.js', $dependency, $version, true );
 
-		wp_enqueue_style( 'google-fonts-open-sans', WP_REACT_PLUGIN_BOILERPLATE_URL . 'assets/library/fonts/open-sans.css', '', $version );
-		wp_enqueue_style( WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME, WP_REACT_PLUGIN_BOILERPLATE_URL . 'build/admin/index.css', array( 'wp-components' ), $version );
-		wp_style_add_data( WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME, 'rtl', 'replace' );
+		wp_enqueue_style( 'google-fonts-open-sans', RESTAURANT_MANAGEMENT_SYSTEM_URL . 'assets/library/fonts/open-sans.css', '', $version );
+		wp_enqueue_style( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME, RESTAURANT_MANAGEMENT_SYSTEM_URL . 'build/admin/index.css', array( 'wp-components' ), $version );
+		wp_style_add_data( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME, 'rtl', 'replace' );
 
 		/* Localize */
 		$localize = apply_filters(
-			'wp_react_plugin_boilerplate_admin_localize',
+			'restaurant_management_system_admin_localize',
 			array(
 				'version'     => $version,
-				'root_id'     => WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME,
+				'root_id'     => RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME,
 				'nonce'       => wp_create_nonce( 'wp_rest' ),
-				'store'       => WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME,
+				'store'       => RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME,
 				'rest_url'    => get_rest_url(),
-				'white_label' => wp_react_plugin_boilerplate_include()->get_white_label(),
+				'white_label' => restaurant_management_system_include()->get_white_label(),
 			)
 		);
 
-		wp_set_script_translations( WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME, WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME );
-		wp_localize_script( WP_REACT_PLUGIN_BOILERPLATE_PLUGIN_NAME, 'WpReactPluginBoilerplateLocalize', $localize );
+		wp_set_script_translations( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME, RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME );
+		wp_localize_script( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME, 'RestaurantManagementSystemLocalize', $localize );
 	}
 
 	/**
@@ -194,7 +194,7 @@ class Wp_React_Plugin_Boilerplate_Admin {
 	 */
 	public function get_settings_schema() {
 		$setting_properties = apply_filters(
-			'wp_react_plugin_boilerplate_options_properties',
+			'restaurant_management_system_options_properties',
 			array(
 				/*Settings -> Settings1*/
 				'setting1'  => array(
@@ -236,11 +236,11 @@ class Wp_React_Plugin_Boilerplate_Admin {
 	 * @return void
 	 */
 	public function register_settings() {
-		$defaults = wp_react_plugin_boilerplate_default_options();
+		$defaults = restaurant_management_system_default_options();
 
 		register_setting(
-			'wp_react_plugin_boilerplate_settings_group',
-			WP_REACT_PLUGIN_BOILERPLATE_OPTION_NAME,
+			'restaurant_management_system_settings_group',
+			RESTAURANT_MANAGEMENT_SYSTEM_OPTION_NAME,
 			array(
 				'type'         => 'object',
 				'default'      => $defaults,
@@ -270,20 +270,20 @@ class Wp_React_Plugin_Boilerplate_Admin {
 	 * @return array settings schema for this plugin.
 	 */
 	public function add_plugin_links( $actions, $plugin_file, $plugin_data, $context ) {
-		$actions[] = '<a href="' . esc_url( menu_page_url( $this->menu_info['menu_slug'], false ) ) . '">' . esc_html__( 'Settings', 'wp-react-plugin-boilerplate' ) . '</a>';
+		$actions[] = '<a href="' . esc_url( menu_page_url( $this->menu_info['menu_slug'], false ) ) . '">' . esc_html__( 'Settings', 'restaurant-management-system' ) . '</a>';
 		return $actions;
 	}
 }
 
-if ( ! function_exists( 'wp_react_plugin_boilerplate_admin' ) ) {
+if ( ! function_exists( 'restaurant_management_system_admin' ) ) {
 	/**
-	 * Return instance of  Wp_React_Plugin_Boilerplate_Admin class
+	 * Return instance of  Restaurant_Management_System_Admin class
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return Wp_React_Plugin_Boilerplate_Admin
+	 * @return Restaurant_Management_System_Admin
 	 */
-	function wp_react_plugin_boilerplate_admin() {//phpcs:ignore
-		return Wp_React_Plugin_Boilerplate_Admin::get_instance();
+	function restaurant_management_system_admin() {//phpcs:ignore
+		return Restaurant_Management_System_Admin::get_instance();
 	}
 }

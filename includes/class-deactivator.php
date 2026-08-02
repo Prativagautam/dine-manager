@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @link       https://www.acmeit.org/
  * @since      1.0.0
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes
  */
 
 /**
@@ -20,11 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.0
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes
  * @author     codersantosh <codersantosh@gmail.com>
  */
-class Wp_React_Plugin_Boilerplate_Deactivator {
+class Restaurant_Management_System_Deactivator {
 
 	/**
 	 * Fired during plugin deactivation.
@@ -34,8 +34,13 @@ class Wp_React_Plugin_Boilerplate_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-		if ( wp_react_plugin_boilerplate_get_options( 'deleteAll' ) ) {
-			delete_option( WP_REACT_PLUGIN_BOILERPLATE_OPTION_NAME );
+			require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-roles.php';
+
+	$roles = new Restaurant_Management_System_Roles();
+	$roles->remove_roles_and_capabilities();
+		if ( restaurant_management_system_get_options( 'deleteAll' ) ) {
+			delete_option( RESTAURANT_MANAGEMENT_SYSTEM_OPTION_NAME );
 		}
+		flush_rewrite_rules();
 	}
 }

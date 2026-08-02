@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @link       https://www.acmeit.org/
  * @since      1.0.0
  *
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes
  */
 
 /**
@@ -20,11 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    Wp_React_Plugin_Boilerplate
- * @subpackage Wp_React_Plugin_Boilerplate/includes
+ * @package    Restaurant_Management_System
+ * @subpackage Restaurant_Management_System/includes
  * @author     codersantosh <codersantosh@gmail.com>
  */
-class Wp_React_Plugin_Boilerplate_Activator {
+class Restaurant_Management_System_Activator {
 
 	/**
 	 * Short Description. (use period)
@@ -34,5 +34,11 @@ class Wp_React_Plugin_Boilerplate_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
+		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-roles.php';
+
+	$roles = new Restaurant_Management_System_Roles();
+	$roles->add_roles_and_capabilities();
+
+	flush_rewrite_rules();
 	}
 }
