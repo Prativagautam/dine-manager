@@ -9,10 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Milestone A (Menu Core): menu_item CPT, menu_category (hierarchical)
  * and dietary_tag (flat) taxonomies, and the price/prep_time_minutes/
- * is_available meta fields. See PLAN.md §5.1 for the full data model —
- * this file only covers Milestone A; Tables/Reservations/Orders get
- * their own register_*_post_type() methods added here in later
- * milestones, same pattern.
+ * is_available meta fields. Milestone B adds the table CPT and its
+ * metadata. See PLAN.md §5.1 for the full data model — this file keeps
+ * each domain's registration grouped in its own method so later
+ * milestones can extend it in the same pattern.
  *
  * @package    Restaurant_Management_System
  * @subpackage Restaurant_Management_System/includes
@@ -46,6 +46,9 @@ class Restaurant_Management_System_Post_Types {
 	 */
 	public function register_post_types() {
 		$this->register_menu_item_post_type();
+		$this->register_table_post_type();
+		$this->register_reservation_post_type();
+		$this->register_order_post_type();
 	}
 
 	/**
@@ -56,6 +59,8 @@ class Restaurant_Management_System_Post_Types {
 	 */
 	public function register_taxonomies() {
 		$this->register_menu_taxonomies();
+		$this->register_order_taxonomy();
+		$this->register_order_status_terms();
 	}
 
 	/**
@@ -66,6 +71,9 @@ class Restaurant_Management_System_Post_Types {
 	 */
 	public function register_meta_fields() {
 		$this->register_menu_meta();
+		$this->register_table_meta();
+		$this->register_reservation_meta();
+		$this->register_order_meta();
 	}
 
 	/**
@@ -111,6 +119,242 @@ class Restaurant_Management_System_Post_Types {
 	}
 
 	/**
+	 * Register the table CPT.
+	 *
+	 * Tables are a transactional data model for the floor-plan and seating
+	 * workflows, so they get their own CPT with explicit meta fields rather
+	 * than being modeled as a taxonomy or a menu-like content type.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_table_post_type() {
+		$labels = array(
+			'name'               => __( 'Tables', 'restaurant-management-system' ),
+			'singular_name'      => __( 'Table', 'restaurant-management-system' ),
+			'add_new'            => __( 'Add New', 'restaurant-management-system' ),
+			'add_new_item'       => __( 'Add New Table', 'restaurant-management-system' ),
+			'edit_item'          => __( 'Edit Table', 'restaurant-management-system' ),
+			'new_item'           => __( 'New Table', 'restaurant-management-system' ),
+			'view_item'          => __( 'View Table', 'restaurant-management-system' ),
+			'search_items'       => __( 'Search Tables', 'restaurant-management-system' ),
+			'not_found'          => __( 'No tables found', 'restaurant-management-system' ),
+			'not_found_in_trash' => __( 'No tables found in Trash', 'restaurant-management-system' ),
+			'menu_name'          => __( 'Tables', 'restaurant-management-system' ),
+		);
+
+		$args = array(
+			'labels'             => $labels,
+			'public'             => true,
+			'show_ui'            => true,
+			'show_in_menu'       => false,
+			'show_in_rest'       => true,
+			'rest_base'          => 'rms-tables',
+			'supports'           => array( 'title', 'custom-fields' ),
+			'has_archive'        => false,
+			'capability_type'    => 'post',
+			'map_meta_cap'       => true,
+		);
+
+		register_post_type( 'table', $args );
+	}
+
+	/**
+	 * Register the reservation CPT.
+	 *
+	 * Reservations are transactional data, not public content. They are
+	 * stored as a CPT so they can use WordPress metadata and REST-friendly
+	 * persistence, while the business rules are enforced in a custom REST
+	 * controller.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_reservation_post_type() {
+		$labels = array(
+			'name'               => __( 'Reservations', 'restaurant-management-system' ),
+			'singular_name'      => __( 'Reservation', 'restaurant-management-system' ),
+			'add_new'            => __( 'Add New', 'restaurant-management-system' ),
+			'add_new_item'       => __( 'Add New Reservation', 'restaurant-management-system' ),
+			'edit_item'          => __( 'Edit Reservation', 'restaurant-management-system' ),
+			'new_item'           => __( 'New Reservation', 'restaurant-management-system' ),
+			'view_item'          => __( 'View Reservation', 'restaurant-management-system' ),
+			'search_items'       => __( 'Search Reservations', 'restaurant-management-system' ),
+			'not_found'          => __( 'No reservations found', 'restaurant-management-system' ),
+			'not_found_in_trash' => __( 'No reservations found in Trash', 'restaurant-management-system' ),
+			'menu_name'          => __( 'Reservations', 'restaurant-management-system' ),
+		);
+
+		$args = array(
+			'labels'             => $labels,
+			'public'             => false,
+			'show_ui'            => false,
+			'show_in_menu'       => false,
+			'show_in_rest'       => false,
+			'supports'           => array( 'title', 'custom-fields' ),
+			'has_archive'        => false,
+			'capability_type'    => 'post',
+			'map_meta_cap'       => true,
+		);
+
+		register_post_type( 'reservation', $args );
+	}
+
+	/**
+	 * Register the order CPT.
+	 *
+	 * Orders are private transactional records. Their lifecycle, price
+	 * snapshots, and ownership rules are enforced by the custom REST
+	 * controller rather than WordPress's generic post endpoints.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_order_post_type() {
+		$labels = array(
+			'name'               => __( 'Orders', 'restaurant-management-system' ),
+			'singular_name'      => __( 'Order', 'restaurant-management-system' ),
+			'add_new'            => __( 'Add New', 'restaurant-management-system' ),
+			'add_new_item'       => __( 'Add New Order', 'restaurant-management-system' ),
+			'edit_item'          => __( 'Edit Order', 'restaurant-management-system' ),
+			'new_item'           => __( 'New Order', 'restaurant-management-system' ),
+			'view_item'          => __( 'View Order', 'restaurant-management-system' ),
+			'search_items'       => __( 'Search Orders', 'restaurant-management-system' ),
+			'not_found'          => __( 'No orders found', 'restaurant-management-system' ),
+			'not_found_in_trash' => __( 'No orders found in Trash', 'restaurant-management-system' ),
+			'menu_name'          => __( 'Orders', 'restaurant-management-system' ),
+		);
+
+		$args = array(
+			'labels'          => $labels,
+			'public'          => false,
+			'show_ui'         => false,
+			'show_in_menu'    => false,
+			'show_in_rest'    => false,
+			'supports'        => array( 'title', 'custom-fields' ),
+			'has_archive'     => false,
+			'capability_type' => 'post',
+			'map_meta_cap'    => true,
+		);
+
+		register_post_type( 'order', $args );
+	}
+
+	/**
+	 * Register reservation meta fields: table_id, customer_id, party_size,
+	 * start_datetime, end_datetime, contact_name, contact_phone.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_reservation_meta() {
+		register_post_meta(
+			'reservation',
+			'table_id',
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'Associated table ID for this reservation.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'reservation',
+			'customer_id',
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'Customer user ID who created the reservation.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'reservation',
+			'party_size',
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'Number of guests in the reservation.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'reservation',
+			'start_datetime',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'UTC ISO 8601 start datetime for the reservation.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'reservation',
+			'end_datetime',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'UTC ISO 8601 end datetime for the reservation.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'reservation',
+			'contact_name',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'Contact name for the reservation.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'reservation',
+			'contact_phone',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'Contact phone number for the reservation.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+	}
+
+	/**
 	 * Register menu_category (hierarchical) and dietary_tag (flat) taxonomies.
 	 *
 	 * @access private
@@ -148,6 +392,56 @@ class Restaurant_Management_System_Post_Types {
 				'show_admin_column' => true,
 			)
 		);
+	}
+
+	/**
+	 * Register the order lifecycle taxonomy.
+	 *
+	 * A taxonomy is used because order lists and the kitchen board need to
+	 * query by status. The valid state changes themselves are still enforced
+	 * in the custom order REST controller.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_order_taxonomy() {
+		register_taxonomy(
+			'order_status',
+			'order',
+			array(
+				'labels'       => array(
+					'name'          => __( 'Order Statuses', 'restaurant-management-system' ),
+					'singular_name' => __( 'Order Status', 'restaurant-management-system' ),
+				),
+				'hierarchical' => false,
+				'public'       => false,
+				'show_ui'      => false,
+				'show_in_rest' => false,
+			),
+		);
+	}
+
+	/**
+	 * Ensure the fixed order lifecycle terms exist.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_order_status_terms() {
+		$statuses = array(
+			'pending'   => __( 'Pending', 'restaurant-management-system' ),
+			'confirmed' => __( 'Confirmed', 'restaurant-management-system' ),
+			'preparing' => __( 'Preparing', 'restaurant-management-system' ),
+			'ready'     => __( 'Ready', 'restaurant-management-system' ),
+			'delivered' => __( 'Delivered', 'restaurant-management-system' ),
+			'cancelled' => __( 'Cancelled', 'restaurant-management-system' ),
+		);
+
+		foreach ( $statuses as $slug => $name ) {
+			if ( ! term_exists( $slug, 'order_status' ) ) {
+				wp_insert_term( $name, 'order_status', array( 'slug' => $slug ) );
+			}
+		}
 	}
 
 	/**
@@ -209,6 +503,178 @@ class Restaurant_Management_System_Post_Types {
 				},
 			)
 		);
+	}
+
+	/**
+	 * Register table meta fields: capacity, section, status, grid_x, grid_y.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_table_meta() {
+		register_post_meta(
+			'table',
+			'capacity',
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'Seating capacity for the table.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'absint',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_tables' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'table',
+			'section',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'Section or zone name for the table.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_tables' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'table',
+			'status',
+			array(
+				'type'              => 'string',
+				'description'       => __( 'Table availability status.', 'restaurant-management-system' ),
+				'single'            => true,
+				'default'           => 'Available',
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => function( $value ) {
+					return in_array( $value, array( 'Available', 'Occupied', 'Reserved' ), true );
+				},
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_tables' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'table',
+			'grid_x',
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'Floor-plan X position.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'absint',
+				'validate_callback' => function( $value ) {
+					if ( ! is_numeric( $value ) ) {
+						return false;
+					}
+
+					$int_value = (int) $value;
+					return $int_value >= 0 && $int_value <= 11;
+				},
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_tables' );
+				},
+			)
+		);
+
+		register_post_meta(
+			'table',
+			'grid_y',
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'Floor-plan Y position.', 'restaurant-management-system' ),
+				'single'            => true,
+				'show_in_rest'      => true,
+				'sanitize_callback' => 'absint',
+				'validate_callback' => function( $value ) {
+					if ( ! is_numeric( $value ) ) {
+						return false;
+					}
+
+					$int_value = (int) $value;
+					return $int_value >= 0 && $int_value <= 11;
+				},
+				'auth_callback'     => function() {
+					return current_user_can( 'manage_rms_tables' );
+				},
+			)
+		);
+	}
+
+	/**
+	 * Register order metadata.
+	 *
+	 * `items` holds a JSON price snapshot created by the server. It is never
+	 * written directly from a client request; see the order REST controller.
+	 *
+	 * @access private
+	 * @since 1.0.0
+	 */
+	private function register_order_meta() {
+		$meta_fields = array(
+			'order_type'   => array(
+				'type'        => 'string',
+				'description' => __( 'Order fulfilment type: dine_in or takeout.', 'restaurant-management-system' ),
+			),
+			'order_source' => array(
+				'type'        => 'string',
+				'description' => __( 'Order origin: staff_pos or customer_portal.', 'restaurant-management-system' ),
+			),
+			'items'        => array(
+				'type'        => 'string',
+				'description' => __( 'Server-generated JSON snapshot of ordered menu items.', 'restaurant-management-system' ),
+			),
+			'total_amount' => array(
+				'type'        => 'number',
+				'description' => __( 'Server-calculated total for the order.', 'restaurant-management-system' ),
+			),
+			'table_id'     => array(
+				'type'        => 'integer',
+				'description' => __( 'Associated table ID for dine-in orders.', 'restaurant-management-system' ),
+			),
+			'customer_id'  => array(
+				'type'        => 'integer',
+				'description' => __( 'Customer who owns the order, if one is associated.', 'restaurant-management-system' ),
+			),
+			'created_by'   => array(
+				'type'        => 'integer',
+				'description' => __( 'WordPress user who created the order.', 'restaurant-management-system' ),
+			),
+		);
+
+		foreach ( $meta_fields as $meta_key => $meta ) {
+			// Meta sanitizers are invoked by WordPress with the value, key, and
+			// object type. Do not register floatval() directly: as an internal PHP
+			// function it rejects those additional arguments, which turns saving an
+			// order total into a fatal error on PHP 8+.
+			$sanitize_callback = 'total_amount' === $meta_key
+				? function( $value ) {
+					return (float) $value;
+				}
+				: ( in_array( $meta_key, array( 'table_id', 'customer_id', 'created_by' ), true ) ? 'absint' : 'sanitize_text_field' );
+
+			register_post_meta(
+				'order',
+				$meta_key,
+				array(
+					'type'              => $meta['type'],
+					'description'       => $meta['description'],
+					'single'            => true,
+					'show_in_rest'      => true,
+					'sanitize_callback' => $sanitize_callback,
+					'auth_callback'     => function() {
+						return current_user_can( 'manage_rms_orders' );
+					},
+				)
+			);
+		}
 	}
 }
 

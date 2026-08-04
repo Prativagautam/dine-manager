@@ -123,7 +123,9 @@ class Restaurant_Management_System {
 		 */
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'public/class-public.php';
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-menu-rest-controller.php';
-
+		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-table-rest-controller.php';
+		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-reservation-rest-controller.php';
+		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-order-rest-controller.php';
 
 
 		$this->loader = new Restaurant_Management_System_Loader();
@@ -202,9 +204,18 @@ class Restaurant_Management_System {
 	}
 
 	private function define_rest_hooks() {
-      $plugin_menu_rest = restaurant_management_system_menu_rest_controller();
-      $this->loader->add_action( 'rest_api_init', $plugin_menu_rest, 'register_routes' );
-  }
+		$plugin_menu_rest = restaurant_management_system_menu_rest_controller();
+		$this->loader->add_action( 'rest_api_init', $plugin_menu_rest, 'register_routes' );
+
+		$plugin_table_rest = restaurant_management_system_table_rest_controller();
+		$this->loader->add_action( 'rest_api_init', $plugin_table_rest, 'register_routes' );
+
+		$plugin_reservation_rest = restaurant_management_system_reservation_rest_controller();
+		$this->loader->add_action( 'rest_api_init', $plugin_reservation_rest, 'register_routes' );
+
+		$plugin_order_rest = restaurant_management_system_order_rest_controller();
+		$this->loader->add_action( 'rest_api_init', $plugin_order_rest, 'register_routes' );
+	}
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
