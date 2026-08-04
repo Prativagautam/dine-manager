@@ -22,11 +22,16 @@ import {
 
 
 import { AtrcApplyWithSettings } from 'atrc/build/data';
-
+import { Flex, Box } from '@mantine/core';
+import Sidebar from './components/organisms/sidebar';
 /*Inbuilt*/
 import AdminHeader from './components/organisms/admin-header';
 import Initlanding from './pages/landing';
 import InitSettings from './pages/settings/routes';
+import MenuManagement from './pages/menu';
+import TableManagement from './pages/tables';
+import Reservations from './pages/reservations';
+import Orders from './pages/orders';
 
 /* Local */
 
@@ -39,11 +44,14 @@ const AdminRoutes = () => {
 
     return (
         <>
-            <AdminHeader />
-            <AtrcMain>
-                <AtrcRoutes>
-                    <AtrcRoute
-                        index
+            <Flex>
+                <Sidebar />
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                    <AdminHeader />
+                    <AtrcMain>
+                        <AtrcRoutes>
+                            <AtrcRoute
+                                index
                         element={<Initlanding />}
                     />
                     <AtrcRoute
@@ -51,6 +59,27 @@ const AdminRoutes = () => {
                         path='/settings/*'
                         element={<InitSettings />}
                     />
+                    <AtrcRoute
+    exact
+    path='/menu'
+    element={<MenuManagement />}
+/>
+                    <AtrcRoute
+    exact
+    path='/tables'
+    element={<TableManagement />}
+/>
+                    <AtrcRoute
+    exact
+    path='/reservations'
+    element={<Reservations />}
+/>
+                    <AtrcRoute
+    exact
+    path='/orders'
+    element={<Orders />}
+/>
+
                 </AtrcRoutes>
                 {/*Notice is common for settings*/}
                 {!isEmpty(dbNotices) ? (
@@ -67,6 +96,8 @@ const AdminRoutes = () => {
                     </AtrcWrapFloating>
                 ) : null}
             </AtrcMain>
+        </Box>
+    </Flex>
         </>
     );
 };

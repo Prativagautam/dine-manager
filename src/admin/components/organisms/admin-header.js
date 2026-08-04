@@ -18,26 +18,21 @@ const AdminHeader = () => {
 
     const { lsSettings, lsSaveSettings } = data;
 
-    const primaryNav = [
-        {
-            to: '/',
-            children: __('Getting started', 'restaurant-management-system'),
-            end: true,
-        },
-        {
-            to: '/settings',
-            children: __('Settings', 'restaurant-management-system'),
-        },
-    ];
+    /*
+     * primaryNav removed — navigation now lives entirely in <Sidebar>
+     * (src/admin/components/organisms/sidebar.js), matching DESIGN.md's
+     * documented pattern (persistent left sidebar owns wayfinding, top
+     * bar is search/notifications/user info only, no nav tabs). This
+     * header previously duplicated navigation with its own top tabs
+     * ("Getting started" / "Settings") — that was boilerplate scaffold,
+     * not an intentional dual-nav design.
+     */
 
     return (
         <AtrcHeaderTemplate1
             isSticky
             logo={{
                 src: RestaurantManagementSystemLocalize.white_label.dashboard.logo,
-            }}
-            primaryNav={{
-                navs: primaryNav,
             }}
             floatingSidebar={() => (
                 <AtrcWrap className={classNames()}>
