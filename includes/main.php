@@ -126,6 +126,7 @@ class Restaurant_Management_System {
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-table-rest-controller.php';
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-reservation-rest-controller.php';
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-order-rest-controller.php';
+		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-customer-rest-controller.php';
 
 
 		$this->loader = new Restaurant_Management_System_Loader();
@@ -201,6 +202,7 @@ class Restaurant_Management_System {
 		$plugin_public = restaurant_management_system_public();
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_public_resources' );
+		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
 	}
 
 	private function define_rest_hooks() {
@@ -215,6 +217,11 @@ class Restaurant_Management_System {
 
 		$plugin_order_rest = restaurant_management_system_order_rest_controller();
 		$this->loader->add_action( 'rest_api_init', $plugin_order_rest, 'register_routes' );
+
+		$plugin_customer_rest = restaurant_management_system_customer_rest_controller();
+		$this->loader->add_action( 'rest_api_init', $plugin_customer_rest, 'register_routes' );
+		$this->loader->add_filter( 'retrieve_password_message', $plugin_customer_rest, 'customize_reset_password_email', 10, 4 );
+
 	}
 
 	/**

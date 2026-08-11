@@ -1,5 +1,5 @@
 /* WordPress */
-import { useState, useEffect, useMemo } from '@wordpress/element';
+import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 
 /* Library */
 import {
@@ -17,37 +17,48 @@ import {
 	Switch,
 	Button,
 	Tabs,
+	ActionIcon,
+	Modal,
 	useMantineTheme,
 } from '@mantine/core';
 
 /* Local */
 import PageWrapper from '../../components/organisms/page-wrapper';
 import PaginationFooter from '../../components/organisms/pagination-footer';
+import MenuItemForm from './create';
+import { Pencil, Trash2 } from 'lucide-react';
+import ConfirmDeleteModal from '../../components/organisms/confirm-delete-modal';
 
 const ITEMS_PER_PAGE = 10;
 
+const EMPTY_FORM_VALUES = {
+	title: '',
+	description: '',
+	price: 0,
+	prep_time_minutes: 0,
+	is_available: true,
+	menu_category: [],
+	dietary_tag: [],
+};
+
 /**
- * Menu Management page.
+ * Convert a fetched menu item (API shape) into the form's edit shape.
  *
- * Fetches from the custom /rms/v1/menu-items REST controller (Milestone A
- * backend). Matches DESIGN.md's token set and the Stitch "Menu Management"
- * screen's layout: filter tabs, image thumbnails, availability toggle,
- * page header with an Add button (non-functional placeholder — create/edit
- * isn't built yet), and pagination (real, wired to the REST controller's
- * existing page/per_page params — this was already supported server-side,
- * just never used from the frontend until now).
- *
- * Background/text color come from <PageWrapper> (shared, DESIGN.md
- * defaults) — this file only sets colors where it genuinely differs from
- * that default, always via theme.other, never a hardcoded hex.
- *
- * Note on filtering + pagination together: switching category tabs
- * currently filters client-side against only the CURRENT page's fetched
- * items, not the full dataset — fine at small scale (a few dozen items),
- * but once real usage grows, category filtering should move server-side
- * too (pass menu_category to the fetch, reset to page 1) rather than
- * filtering only what happens to be on the page already loaded.
+ * NOTE: item.description is HTML (server runs it through the
+ * `the_content` filter), but the form's Textarea is plain text — editing
+ * an existing item will show raw <p> tags. Not fixed here; needs a
+ * decision (rich text editor vs. stripping tags) before it's correct.
  */
+const itemToFormValues = (item) => ({
+	title: item.title,
+	description: item.description,
+	price: item.price,
+	prep_time_minutes: item.prep_time_minutes,
+	is_available: item.is_available,
+	menu_category: item.menu_category,
+	dietary_tag: item.dietary_tag,
+});
+
 const MenuManagement = () => {
 	const theme = useMantineTheme();
 	const [items, setItems] = useState([]);
@@ -58,29 +69,32 @@ const MenuManagement = () => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalItems, setTotalItems] = useState(0);
 
-	useEffect(() => {
+	const [formOpen, setFormOpen] = useState(false);
+	const [formMode, setFormMode] = useState('create');
+	const [formDefaults, setFormDefaults] = useState(EMPTY_FORM_VALUES);
+	const [editingId, setEditingId] = useState(null);
+	const [formLoading, setFormLoading] = useState(false);
+	const [formError, setFormError] = useState(null);
+
+	const [deleteTarget, setDeleteTarget] = useState(null);
+	const [deleting, setDeleting] = useState(false);
+	const [deleteError, setDeleteError] = useState(null);
+
+	const fetchItems = useCallback(() => {
 		const { rest_url: restUrl, nonce } = RestaurantManagementSystemLocalize;
 
 		setIsLoading(true);
 
-		fetch(
+		return fetch(
 			`${restUrl}rms/v1/menu-items?page=${page}&per_page=${ITEMS_PER_PAGE}`,
-			{
-				headers: {
-					'X-WP-Nonce': nonce,
-				},
-			}
+			{ headers: { 'X-WP-Nonce': nonce } }
 		)
 			.then((response) => {
 				if (!response.ok) {
 					throw new Error(`Request failed: ${response.status}`);
 				}
-				setTotalPages(
-					parseInt(response.headers.get('X-WP-TotalPages') || '1', 10)
-				);
-				setTotalItems(
-					parseInt(response.headers.get('X-WP-Total') || '0', 10)
-				);
+				setTotalPages(parseInt(response.headers.get('X-WP-TotalPages') || '1', 10));
+				setTotalItems(parseInt(response.headers.get('X-WP-Total') || '0', 10));
 				return response.json();
 			})
 			.then((data) => {
@@ -93,7 +107,10 @@ const MenuManagement = () => {
 			});
 	}, [page]);
 
-	/* Derive the set of categories actually present, for the filter tabs */
+	useEffect(() => {
+		fetchItems();
+	}, [fetchItems]);
+
 	const categories = useMemo(() => {
 		const set = new Set();
 		items.forEach((item) => item.menu_category.forEach((cat) => set.add(cat)));
@@ -107,6 +124,127 @@ const MenuManagement = () => {
 		return items.filter((item) => item.menu_category.includes(activeCategory));
 	}, [items, activeCategory]);
 
+	const openCreateForm = () => {
+		setFormMode('create');
+		setEditingId(null);
+		setFormDefaults(EMPTY_FORM_VALUES);
+		setFormError(null);
+		setFormOpen(true);
+	};
+
+	const openEditForm = (item) => {
+		setFormMode('edit');
+		setEditingId(item.id);
+		setFormDefaults(itemToFormValues(item));
+		setFormError(null);
+		setFormOpen(true);
+	};
+
+	const closeForm = () => {
+		if (!formLoading) {
+			setFormOpen(false);
+			setFormError(null);
+		}
+	};
+
+	const submitForm = async (values) => {
+		const { rest_url: restUrl, nonce } = RestaurantManagementSystemLocalize;
+		setFormLoading(true);
+		setFormError(null);
+
+		const isEdit = formMode === 'edit';
+		const url = isEdit
+			? `${restUrl}rms/v1/menu-items/${editingId}`
+			: `${restUrl}rms/v1/menu-items`;
+
+		try {
+			const response = await fetch(url, {
+				method: isEdit ? 'PATCH' : 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': nonce,
+				},
+				body: JSON.stringify(values),
+			});
+
+			if (!response.ok) {
+				const body = await response.json().catch(() => null);
+				throw new Error(body?.message || `Request failed: ${response.status}`);
+			}
+
+			setFormOpen(false);
+			await fetchItems();
+		} catch (requestError) {
+			setFormError(requestError.message);
+		} finally {
+			setFormLoading(false);
+		}
+	};
+
+	const toggleAvailability = async (item) => {
+		const { rest_url: restUrl, nonce } = RestaurantManagementSystemLocalize;
+		const nextAvailable = !item.is_available;
+
+		// Optimistic update so the switch feels instant; rolled back below
+		// on failure so the UI never shows a state the server didn't accept.
+		setItems((current) =>
+			current.map((candidate) =>
+				candidate.id === item.id ? { ...candidate, is_available: nextAvailable } : candidate
+			)
+		);
+
+		try {
+			const response = await fetch(`${restUrl}rms/v1/menu-items/${item.id}`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': nonce,
+				},
+				body: JSON.stringify({ is_available: nextAvailable }),
+			});
+
+			if (!response.ok) {
+				throw new Error(`Request failed: ${response.status}`);
+			}
+		} catch (requestError) {
+			setItems((current) =>
+				current.map((candidate) =>
+					candidate.id === item.id ? { ...candidate, is_available: item.is_available } : candidate
+				)
+			);
+			setError(requestError.message);
+		}
+	};
+
+	const confirmDelete = async () => {
+		if (!deleteTarget) {
+			return;
+		}
+
+		const { rest_url: restUrl, nonce } = RestaurantManagementSystemLocalize;
+		setDeleting(true);
+		setDeleteError(null);
+
+		try {
+			const response = await fetch(`${restUrl}rms/v1/menu-items/${deleteTarget.id}`, {
+				method: 'DELETE',
+				headers: { 'X-WP-Nonce': nonce },
+			});
+
+			if (!response.ok) {
+				const body = await response.json().catch(() => null);
+				throw new Error(body?.message || `Request failed: ${response.status}`);
+			}
+
+			setDeleteTarget(null);
+			await fetchItems();
+		} catch (requestError) {
+			setDeleteError(requestError.message);
+		} finally {
+			setDeleting(false);
+		}
+	};
+
 	if (isLoading) {
 		return (
 			<PageWrapper>
@@ -117,7 +255,7 @@ const MenuManagement = () => {
 		);
 	}
 
-	if (error) {
+	if (error && !items.length) {
 		return (
 			<PageWrapper>
 				<Alert color="attention" title="Failed to load menu items">
@@ -130,7 +268,6 @@ const MenuManagement = () => {
 	return (
 		<PageWrapper>
 			<Stack gap="lg" maw={1440} mx="auto">
-				{/* Page header */}
 				<Group justify="space-between" align="flex-end">
 					<div>
 						<Title order={1} ff="'Source Serif 4', serif">
@@ -140,18 +277,18 @@ const MenuManagement = () => {
 							Configure and monitor your restaurant's digital menu items.
 						</Text>
 					</div>
-					<Button color="brand" radius="lg">
+					<Button color="brand" radius="lg" onClick={openCreateForm}>
 						+ Add Menu Item
 					</Button>
 				</Group>
 
-				{/* Filter tabs */}
-				<Tabs
-					value={activeCategory}
-					onChange={setActiveCategory}
-					color="brand"
-					variant="outline"
-				>
+				{error ? (
+					<Alert color="attention" title="Something went wrong">
+						{error}
+					</Alert>
+				) : null}
+
+				<Tabs value={activeCategory} onChange={setActiveCategory} color="brand" variant="outline">
 					<Tabs.List>
 						<Tabs.Tab value="all">All Items</Tabs.Tab>
 						{categories.map((cat) => (
@@ -162,7 +299,6 @@ const MenuManagement = () => {
 					</Tabs.List>
 				</Tabs>
 
-				{/* Menu items table */}
 				<Paper withBorder radius="md" p={0} bg={theme.other.surfaceContainerLowest}>
 					<Table striped highlightOnHover verticalSpacing="md">
 						<Table.Thead bg={theme.other.surfaceContainerLow}>
@@ -173,17 +309,14 @@ const MenuManagement = () => {
 								<Table.Th>Price</Table.Th>
 								<Table.Th>Dietary</Table.Th>
 								<Table.Th>Status</Table.Th>
+								<Table.Th>Actions</Table.Th>
 							</Table.Tr>
 						</Table.Thead>
 						<Table.Tbody>
 							{filteredItems.map((item) => (
 								<Table.Tr key={item.id}>
 									<Table.Td>
-										<Avatar
-											src={item.featured_image_url}
-											radius="md"
-											size={56}
-										>
+										<Avatar src={item.featured_image_url} radius="md" size={56}>
 											{item.title.charAt(0)}
 										</Avatar>
 									</Table.Td>
@@ -193,12 +326,7 @@ const MenuManagement = () => {
 									<Table.Td>
 										<Group gap="xs">
 											{item.menu_category.map((cat) => (
-												<Badge
-													key={cat}
-													color="brand"
-													variant="light"
-													tt="capitalize"
-												>
+												<Badge key={cat} color="brand" variant="light" tt="capitalize">
 													{cat}
 												</Badge>
 											))}
@@ -210,13 +338,7 @@ const MenuManagement = () => {
 									<Table.Td>
 										<Group gap="xs">
 											{item.dietary_tag.map((tag) => (
-												<Badge
-													key={tag}
-													color="available"
-													variant="outline"
-													size="sm"
-													tt="capitalize"
-												>
+												<Badge key={tag} color="available" variant="outline" size="sm" tt="capitalize">
 													{tag}
 												</Badge>
 											))}
@@ -224,12 +346,34 @@ const MenuManagement = () => {
 									</Table.Td>
 									<Table.Td>
 										<Switch
-											checked={true /* meta write-back not built yet */}
-											readOnly
+											checked={item.is_available}
+											onChange={() => toggleAvailability(item)}
 											color="brand"
 											label="Available"
 										/>
 									</Table.Td>
+									<Table.Td>
+	<Group gap="xs">
+		<ActionIcon
+			variant="light"
+			color="brand"
+			onClick={() => openEditForm(item)}
+			aria-label="Edit menu item"
+		>
+			<Pencil size={16} />
+		</ActionIcon>
+		<ActionIcon
+			variant="light"
+			color="attention"
+			onClick={() => setDeleteTarget(item)}
+			aria-label="Delete menu item"
+		>
+			<Trash2 size={16} />
+		</ActionIcon>
+	</Group>
+</Table.Td>
+		
+									
 								</Table.Tr>
 							))}
 						</Table.Tbody>
@@ -245,6 +389,26 @@ const MenuManagement = () => {
 					/>
 				</Paper>
 			</Stack>
+
+			<MenuItemForm
+				opened={formOpen}
+				mode={formMode}
+				defaultValues={formDefaults}
+				loading={formLoading}
+				error={formError}
+				onClose={closeForm}
+				onSubmit={submitForm}
+			/>
+
+			<ConfirmDeleteModal
+	opened={Boolean(deleteTarget)}
+	title="Delete menu item"
+	message={`Move "${deleteTarget?.title}" to trash? This item will be removed from the menu and order picker.`}
+	loading={deleting}
+	error={deleteError}
+	onCancel={() => setDeleteTarget(null)}
+	onConfirm={confirmDelete}
+/>
 		</PageWrapper>
 	);
 };

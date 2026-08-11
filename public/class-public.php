@@ -26,6 +26,52 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Restaurant_Management_System_Public {
 
 	/**
+	 * Register the customer portal shortcodes.
+	 *
+	 * [restaurant_customer_portal] renders both actions. Sites that place the
+	 * actions on separate pages can use [restaurant_order_form] and
+	 * [restaurant_reservation_form].
+	 *
+	 * @return void
+	 */
+	public function register_shortcodes() {
+		add_shortcode( 'restaurant_customer_portal', array( $this, 'render_customer_portal' ) );
+		add_shortcode( 'restaurant_order_form', array( $this, 'render_order_portal' ) );
+		add_shortcode( 'restaurant_reservation_form', array( $this, 'render_reservation_portal' ) );
+	}
+
+	/**
+	 * Render the combined customer portal.
+	 *
+	 * @param array $attributes Shortcode attributes.
+	 * @return string
+	 */
+	public function render_customer_portal( $attributes = array() ) {
+		$attributes = shortcode_atts( array( 'view' => 'all' ), $attributes, 'restaurant_customer_portal' );
+		$view       = in_array( $attributes['view'], array( 'all', 'order', 'reservation' ), true ) ? $attributes['view'] : 'all';
+
+		return sprintf( '<div class="rms-customer-portal" data-rms-portal="%s"></div>', esc_attr( $view ) );
+	}
+
+	/**
+	 * Render the order-only customer portal.
+	 *
+	 * @return string
+	 */
+	public function render_order_portal() {
+		return $this->render_customer_portal( array( 'view' => 'order' ) );
+	}
+
+	/**
+	 * Render the reservation-only customer portal.
+	 *
+	 * @return string
+	 */
+	public function render_reservation_portal() {
+		return $this->render_customer_portal( array( 'view' => 'reservation' ) );
+	}
+
+	/**
 	 * Gets an instance of this object.
 	 * Prevents duplicate instances which avoid artefacts and improves performance.
 	 *
@@ -96,6 +142,8 @@ class Restaurant_Management_System_Public {
 				'site_url'                        => esc_url( home_url() ),
 				'rest_url'                        => get_rest_url(),
 				'nonce'                           => wp_create_nonce( 'wp_rest' ),
+				'is_logged_in'                    => is_user_logged_in(),
+				'login_url'                       => wp_login_url( esc_url_raw( add_query_arg( array(), get_permalink() ) ) ),
 			)
 		);
 

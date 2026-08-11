@@ -235,6 +235,7 @@ class Restaurant_Management_System_Post_Types {
 			'has_archive'     => false,
 			'capability_type' => 'post',
 			'map_meta_cap'    => true,
+			'query_var'       => false,
 		);
 
 		register_post_type( 'order', $args );

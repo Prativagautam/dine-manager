@@ -23,12 +23,15 @@ import {
 	Title,
 	Alert,
 	useMantineTheme,
+	ActionIcon,
 } from '@mantine/core';
 
 /* Local */
 import PageWrapper from '../../components/organisms/page-wrapper';
 import PaginationFooter from '../../components/organisms/pagination-footer';
 import TableForm, { TableFormValues } from './create';
+import { Pencil, Trash2 } from 'lucide-react';
+import ConfirmDeleteModal from '../../components/organisms/confirm-delete-modal';
 
 type TableMode = 'create' | 'edit';
 
@@ -62,6 +65,9 @@ const TableManagement = () => {
 	const [formData, setFormData] = useState<TableFormValues>(initialFormState);
 	const [formLoading, setFormLoading] = useState<boolean>(false);
 	const [formError, setFormError] = useState<string | null>(null);
+	const [deleteTarget, setDeleteTarget] = useState<TableItem | null>(null);
+    const [deleting, setDeleting] = useState<boolean>(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
 	const fetchTables = async () => {
 		const { rest_url: restUrl, nonce } = RestaurantManagementSystemLocalize;
@@ -221,27 +227,35 @@ const TableManagement = () => {
 		setFormOpen(false);
 	};
 
-	const handleDelete = async (tableId: number) => {
-		if (!window.confirm('Move this table to trash?')) {
-			return;
-		}
+	const confirmDeleteTable = async () => {
+	if (!deleteTarget) {
+		return;
+	}
 
-		const { rest_url: restUrl, nonce } = RestaurantManagementSystemLocalize;
-		const response = await fetch(`${restUrl}rms/v1/tables/${tableId}`, {
+	const { rest_url: restUrl, nonce } = RestaurantManagementSystemLocalize;
+	setDeleting(true);
+	setDeleteError(null);
+
+	try {
+		const response = await fetch(`${restUrl}rms/v1/tables/${deleteTarget.id}`, {
 			method: 'DELETE',
-			headers: {
-				'X-WP-Nonce': nonce,
-			},
+			headers: { 'X-WP-Nonce': nonce },
 		});
 
 		if (!response.ok) {
 			const body = (await response.json().catch(() => null)) as { message?: string } | null;
-			setError(body?.message || `Request failed: ${response.status}`);
-			return;
+			throw new Error(body?.message || `Request failed: ${response.status}`);
 		}
 
-		fetchTables();
-	};
+		setDeleteTarget(null);
+		await fetchTables();
+	} catch (requestError) {
+		setDeleteError((requestError as Error).message);
+	} finally {
+		setDeleting(false);
+	}
+};
+
 
 	if (isLoading) {
 		return (
@@ -333,15 +347,25 @@ const TableManagement = () => {
 									</Table.Td>
 									<Table.Td>{table.grid_x ?? '-'} / {table.grid_y ?? '-'}</Table.Td>
 									<Table.Td>
-										<Group spacing="xs">
-											<Button size="xs" color="brand" onClick={() => openEditForm(table)}>
-												Edit
-											</Button>
-											<Button size="xs" color="red" variant="outline" onClick={() => handleDelete(table.id)}>
-												Delete
-											</Button>
-										</Group>
-									</Table.Td>
+	<Group spacing="xs">
+		<ActionIcon
+			variant="light"
+			color="brand"
+			onClick={() => openEditForm(table)}
+			aria-label="Edit table"
+		>
+			<Pencil size={16} />
+		</ActionIcon>
+		<ActionIcon
+			variant="light"
+			color="attention"
+			onClick={() => setDeleteTarget(table)}
+			aria-label="Delete table"
+		>
+			<Trash2 size={16} />
+		</ActionIcon>
+	</Group>
+</Table.Td>
 								</Table.Tr>
 							))}
 						</Table.Tbody>
@@ -367,6 +391,15 @@ const TableManagement = () => {
 					error={formError}
 				/>
 			</Stack>
+			<ConfirmDeleteModal
+	opened={Boolean(deleteTarget)}
+	title="Delete table"
+	message={`Move "${deleteTarget?.title}" to trash? This cannot be undone from here.`}
+	loading={deleting}
+	error={deleteError}
+	onCancel={() => setDeleteTarget(null)}
+	onConfirm={confirmDeleteTable}
+/>
 		</PageWrapper>
 	);
 };

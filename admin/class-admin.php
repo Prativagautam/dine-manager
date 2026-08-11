@@ -72,7 +72,7 @@ class Restaurant_Management_System_Admin {
 		add_menu_page(
 			$this->menu_info['page_title'],
 			$this->menu_info['menu_title'],
-			'manage_options',
+			'access_rms_admin',
 			$this->menu_info['menu_slug'],
 			array( $this, 'add_setting_root_div' ),
 			$this->menu_info['icon_url'],
@@ -173,6 +173,12 @@ class Restaurant_Management_System_Admin {
 				'store'       => RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME,
 				'rest_url'    => get_rest_url(),
 				'white_label' => restaurant_management_system_include()->get_white_label(),
+				'capabilities' => array(
+			'manage_rms_menu_items'   => current_user_can( 'manage_rms_menu_items' ),
+			'manage_rms_orders'       => current_user_can( 'manage_rms_orders' ),
+			'manage_rms_reservations' => current_user_can( 'manage_rms_reservations' ),
+			'manage_rms_tables'       => current_user_can( 'manage_rms_tables' ),
+		),
 			)
 		);
 

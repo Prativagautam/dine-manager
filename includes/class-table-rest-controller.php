@@ -54,6 +54,20 @@ class Restaurant_Management_System_Table_Rest_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
+		// Customers need table IDs and capacities to make a reservation, but
+		// should not receive the operational table-management endpoint.
+		register_rest_route(
+			$this->namespace,
+			'/customer-tables',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_customer_tables' ),
+				'permission_callback' => function() {
+					return current_user_can( 'create_rms_reservations' ) || current_user_can( 'manage_rms_reservations' );
+				},
+			)
+		);
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -115,7 +129,7 @@ class Restaurant_Management_System_Table_Rest_Controller {
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => function( $value, $request, $key ) {
-					return in_array( $value, array( 'Available', 'Occupied', 'Reserved' ), true );
+					return in_array( $value, array( 'Available', 'Occupied', 'Out of Service' ), true );
 				},
 			),
 			'capacity' => array(
@@ -175,6 +189,35 @@ class Restaurant_Management_System_Table_Rest_Controller {
 		$items = array();
 		foreach ( $query->posts as $post ) {
 			$items[] = $this->prepare_item_for_response( $post );
+		}
+
+		return rest_ensure_response( $items );
+	}
+
+	/**
+	 * Return the small, customer-safe table shape needed by booking forms.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_customer_tables() {
+		$query = new WP_Query(
+			array(
+				'post_type'      => 'table',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'orderby'        => 'menu_order',
+				'order'          => 'ASC',
+			)
+		);
+
+		$items = array();
+		foreach ( $query->posts as $post ) {
+			$items[] = array(
+				'id'       => $post->ID,
+				'title'    => get_the_title( $post ),
+				'capacity' => absint( get_post_meta( $post->ID, 'capacity', true ) ),
+				'section'  => get_post_meta( $post->ID, 'section', true ),
+			);
 		}
 
 		return rest_ensure_response( $items );

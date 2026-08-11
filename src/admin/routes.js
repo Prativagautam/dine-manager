@@ -8,7 +8,7 @@ import { render, createContext, useContext } from '@wordpress/element';
 import { map, isEmpty } from 'lodash';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
-import { theme } from './theme'; 
+import { theme } from '../shared/theme';
 /*Atrc*/
 import {
     AtrcHashRouter,
@@ -26,6 +26,7 @@ import { Flex, Box } from '@mantine/core';
 import Sidebar from './components/organisms/sidebar';
 /*Inbuilt*/
 import AdminHeader from './components/organisms/admin-header';
+import RequireCapability from './components/organisms/require-capability';
 import Initlanding from './pages/landing';
 import InitSettings from './pages/settings/routes';
 import MenuManagement from './pages/menu';
@@ -52,52 +53,67 @@ const AdminRoutes = () => {
                         <AtrcRoutes>
                             <AtrcRoute
                                 index
-                        element={<Initlanding />}
-                    />
-                    <AtrcRoute
-                        exact
-                        path='/settings/*'
-                        element={<InitSettings />}
-                    />
-                    <AtrcRoute
-    exact
-    path='/menu'
-    element={<MenuManagement />}
-/>
-                    <AtrcRoute
-    exact
-    path='/tables'
-    element={<TableManagement />}
-/>
-                    <AtrcRoute
-    exact
-    path='/reservations'
-    element={<Reservations />}
-/>
-                    <AtrcRoute
-    exact
-    path='/orders'
-    element={<Orders />}
-/>
-
-                </AtrcRoutes>
-                {/*Notice is common for settings*/}
-                {!isEmpty(dbNotices) ? (
-                    <AtrcWrapFloating>
-                        {map(dbNotices, (value, key) => (
-                            <AtrcNotice
-                                key={key}
-                                autoDismiss={5000}
-                                onAutoRemove={() => dbRemoveNotice(key)}
-                                onRemove={() => dbRemoveNotice(key)}>
-                                {value.message}
-                            </AtrcNotice>
-                        ))}
-                    </AtrcWrapFloating>
-                ) : null}
-            </AtrcMain>
-        </Box>
-    </Flex>
+                                element={<Initlanding />}
+                            />
+                            <AtrcRoute
+                                exact
+                                path='/settings/*'
+                                element={<InitSettings />}
+                            />
+                            <AtrcRoute
+                                exact
+                                path='/menu'
+                                element={
+                                    <RequireCapability capability='manage_rms_menu_items'>
+                                        <MenuManagement />
+                                    </RequireCapability>
+                                }
+                            />
+                            <AtrcRoute
+                                exact
+                                path='/tables'
+                                element={
+                                    <RequireCapability capability='manage_rms_tables'>
+                                        <TableManagement />
+                                    </RequireCapability>
+                                }
+                            />
+                            <AtrcRoute
+                                exact
+                                path='/reservations'
+                                element={
+                                    <RequireCapability capability='manage_rms_reservations'>
+                                        <Reservations />
+                                    </RequireCapability>
+                                }
+                            />
+                            <AtrcRoute
+                                exact
+                                path='/orders'
+                                element={
+                                    <RequireCapability capability='manage_rms_orders'>
+                                        <Orders />
+                                    </RequireCapability>
+                                }
+                            />
+                        </AtrcRoutes>
+                        {/*Notice is common for settings*/}
+                        {!isEmpty(dbNotices) ? (
+                            <AtrcWrapFloating>
+                                {map(dbNotices, (value, key) => (
+                                    <AtrcNotice
+                                        key={key}
+                                        autoDismiss={5000}
+                                        onAutoRemove={() => dbRemoveNotice(key)}
+                                        onRemove={() => dbRemoveNotice(key)}>
+                                        {value.message}
+                                    </AtrcNotice>
+                                ))}
+                            </AtrcWrapFloating>
+                        ) : null}
+                    </AtrcMain>
+                </Box>
+            </Flex>
         </>
     );
 };

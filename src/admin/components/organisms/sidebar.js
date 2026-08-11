@@ -30,14 +30,22 @@ import {
  * on whether the earlier font-loading PHP change was applied). Add icons
  * once that's confirmed, rather than guessing at an unverified icon
  * package.
+ *
+ * `capability` on a nav item is the presentation-layer gate — it only
+ * decides whether the link renders. It is NOT a security boundary; the
+ * real enforcement for every one of these sections is already in each
+ * REST controller's permission_callback. A user who somehow reached
+ * /menu without manage_rms_menu_items would still get 403s from every
+ * write request — this filter just keeps them from seeing a link that
+ * would only frustrate them.
  */
 const NAV_ITEMS = [
 	{ to: '/', label: __( 'Dashboard', 'restaurant-management-system' ), icon: LayoutDashboard },
-	{ to: '/menu', label: __( 'Menu', 'restaurant-management-system' ), icon: Menu },
-	{ to: '/tables', label: __( 'Tables', 'restaurant-management-system' ), icon: Table2 },
-	{ to: '/reservations', label: __( 'Reservations', 'restaurant-management-system' ), icon: CalendarRange },
-	{ to: '/orders', label: __( 'Orders', 'restaurant-management-system' ), icon: ShoppingBasket },
-	{ to: '/floor-plan', label: __( 'Floor Plan', 'restaurant-management-system' ), icon: Map },
+	{ to: '/menu', label: __( 'Menu', 'restaurant-management-system' ), icon: Menu, capability: 'manage_rms_menu_items' },
+	{ to: '/tables', label: __( 'Tables', 'restaurant-management-system' ), icon: Table2, capability: 'manage_rms_tables' },
+	{ to: '/reservations', label: __( 'Reservations', 'restaurant-management-system' ), icon: CalendarRange, capability: 'manage_rms_reservations' },
+	{ to: '/orders', label: __( 'Orders', 'restaurant-management-system' ), icon: ShoppingBasket, capability: 'manage_rms_orders' },
+	{ to: '/floor-plan', label: __( 'Floor Plan', 'restaurant-management-system' ), icon: Map, capability: 'manage_rms_tables' },
 ];
 
 /* Settings moved here from AdminHeader's old primaryNav — matches
@@ -50,6 +58,15 @@ const FOOTER_NAV_ITEMS = [
 const Sidebar = () => {
 	const theme = useMantineTheme();
 	const location = useLocation();
+
+	// Anyone reaching this component already has access_rms_admin (the
+	// wp-admin menu itself is gated on that), so Dashboard/Settings have
+	// no `capability` requirement — they're visible to Staff and Admin
+	// alike. Items with a `capability` only show if the current user's
+	// localized capabilities include it.
+	const { capabilities = {} } = RestaurantManagementSystemLocalize;
+
+	const isVisible = ( item ) => ! item.capability || capabilities[ item.capability ];
 
 	const renderNavLink = ( item ) => {
 		const isActive =
@@ -92,12 +109,12 @@ const Sidebar = () => {
 			</Box>
 
 			<Stack gap={4}>
-				{NAV_ITEMS.map( renderNavLink )}
+				{NAV_ITEMS.filter( isVisible ).map( renderNavLink )}
 			</Stack>
 
 			<Box mt="auto" pt="md" style={{ borderTop: `1px solid ${theme.other.outlineVariant}` }}>
 				<Stack gap={4}>
-					{FOOTER_NAV_ITEMS.map( renderNavLink )}
+					{FOOTER_NAV_ITEMS.filter( isVisible ).map( renderNavLink )}
 				</Stack>
 			</Box>
 		</Box>

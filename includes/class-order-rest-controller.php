@@ -166,6 +166,53 @@ class Restaurant_Management_System_Order_Rest_Controller {
 	}
 
 	/**
+	 * Recalculate a table's status from its current active dine-in orders.
+	 *
+	 * "Active" = any order_status other than delivered/cancelled. Skips
+	 * tables that a staff member has manually set to Out of Service, so
+	 * order events never silently override a manual override.
+	 *
+	 * @param int $table_id Table post ID.
+	 * @return void
+	 */
+	private function sync_table_status( $table_id ) {
+		if ( ! $table_id ) {
+			return;
+		}
+
+		$current_status = get_post_meta( $table_id, 'status', true );
+		if ( 'Out of Service' === $current_status ) {
+			return;
+		}
+
+		$active_orders = new WP_Query(
+			array(
+				'post_type'      => 'order',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_query'     => array(
+					array(
+						'key'   => 'table_id',
+						'value' => $table_id,
+					),
+				),
+				'tax_query'      => array(
+					array(
+						'taxonomy' => 'order_status',
+						'field'    => 'slug',
+						'terms'    => array( 'delivered', 'cancelled' ),
+						'operator' => 'NOT IN',
+					),
+				),
+			)
+		);
+
+		$status = $active_orders->have_posts() ? 'Occupied' : 'Available';
+		update_post_meta( $table_id, 'status', $status );
+	}
+
+	/**
 	 * Creation arguments. Prices and totals are intentionally not accepted.
 	 *
 	 * @return array
@@ -283,7 +330,7 @@ class Restaurant_Management_System_Order_Rest_Controller {
 		if ( $status ) {
 			$args['tax_query'] = array(
 				array(
-					'taxonomy' => 'order_status',
+					'taxonomy' => 'order_status',            
 					'field'    => 'slug',
 					'terms'    => $status,
 				),
@@ -392,6 +439,10 @@ class Restaurant_Management_System_Order_Rest_Controller {
 		update_post_meta( $order_id, 'customer_id', $customer_id );
 		update_post_meta( $order_id, 'created_by', $current_user_id );
 
+		if ( 'dine_in' === $order_type && $table_id ) {
+			$this->sync_table_status( $table_id );
+		}
+
 		$response = rest_ensure_response( $this->prepare_item_for_response( get_post( $order_id ) ) );
 		$response->set_status( 201 );
 
@@ -423,6 +474,13 @@ class Restaurant_Management_System_Order_Rest_Controller {
 
 		if ( $next_status !== $current_status ) {
 			wp_set_object_terms( $order->ID, $next_status, 'order_status', false );
+		}
+
+		$order_type = get_post_meta( $order->ID, 'order_type', true );
+		$table_id   = absint( get_post_meta( $order->ID, 'table_id', true ) );
+
+		if ( 'dine_in' === $order_type && $table_id ) {
+			$this->sync_table_status( $table_id );
 		}
 
 		return rest_ensure_response( $this->prepare_item_for_response( get_post( $order->ID ) ) );
@@ -474,7 +532,7 @@ class Restaurant_Management_System_Order_Rest_Controller {
 			}
 
 			$availability = get_post_meta( $menu_item_id, 'is_available', true );
-			if ( '' !== $availability && ! rest_sanitize_boolean( $availability ) ) {
+			if ( ! rest_sanitize_boolean( $availability ) ) {
 				return new WP_Error(
 					'rest_menu_item_unavailable',
 					__( 'One or more menu items are unavailable.', 'restaurant-management-system' ),
@@ -512,8 +570,10 @@ class Restaurant_Management_System_Order_Rest_Controller {
 		if ( 'customer_portal' === $order_source && 'takeout' === $order_type ) {
 			return true;
 		}
-
-		return $is_manager && 'staff_pos' === $order_source && 'dine_in' === $order_type;
+		if($is_manager && 'staff_pos' === $order_source) {
+			return in_array($order_type, array('dine_in', 'takeout'), true);
+		}
+		return false;
 	}
 
 	/**
