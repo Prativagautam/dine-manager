@@ -5,3 +5,5 @@ git-source
 deploy
 build/
 TASK.MD
+vendor/
+
