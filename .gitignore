@@ -7,3 +7,5 @@ build/
 TASK.MD
 vendor/
 
+*.sql.gz
+*.sql.gz

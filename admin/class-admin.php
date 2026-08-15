@@ -167,18 +167,18 @@ class Restaurant_Management_System_Admin {
 		$localize = apply_filters(
 			'restaurant_management_system_admin_localize',
 			array(
-				'version'     => $version,
-				'root_id'     => RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME,
-				'nonce'       => wp_create_nonce( 'wp_rest' ),
-				'store'       => RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME,
-				'rest_url'    => get_rest_url(),
-				'white_label' => restaurant_management_system_include()->get_white_label(),
+				'version'      => $version,
+				'root_id'      => RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME,
+				'nonce'        => wp_create_nonce( 'wp_rest' ),
+				'store'        => RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME,
+				'rest_url'     => get_rest_url(),
+				'white_label'  => restaurant_management_system_include()->get_white_label(),
 				'capabilities' => array(
-			'manage_rms_menu_items'   => current_user_can( 'manage_rms_menu_items' ),
-			'manage_rms_orders'       => current_user_can( 'manage_rms_orders' ),
-			'manage_rms_reservations' => current_user_can( 'manage_rms_reservations' ),
-			'manage_rms_tables'       => current_user_can( 'manage_rms_tables' ),
-		),
+					'manage_rms_menu_items'   => current_user_can( 'manage_rms_menu_items' ),
+					'manage_rms_orders'       => current_user_can( 'manage_rms_orders' ),
+					'manage_rms_reservations' => current_user_can( 'manage_rms_reservations' ),
+					'manage_rms_tables'       => current_user_can( 'manage_rms_tables' ),
+				),
 			)
 		);
 

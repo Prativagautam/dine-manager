@@ -14,10 +14,22 @@ class Restaurant_Management_System_Customer_Rest_Controller {
 				'callback'            => array( $this, 'register_customer' ),
 				'permission_callback' => '__return_true', // Public route — anyone can hit this, logged in or not.
 				'args'                => array(
-					'name'     => array( 'required' => true, 'type' => 'string' ),
-					'email'    => array( 'required' => true, 'type' => 'string' ),
-					'phone'    => array( 'required' => true, 'type' => 'string' ),
-					'password' => array( 'required' => true, 'type' => 'string' ),
+					'name'     => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'email'    => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'phone'    => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'password' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
 				),
 			)
 		);
@@ -30,43 +42,57 @@ class Restaurant_Management_System_Customer_Rest_Controller {
 				'callback'            => array( $this, 'login_customer' ),
 				'permission_callback' => '__return_true', // Public — the whole point is the user isn't authenticated yet.
 				'args'                => array(
-					'email'    => array( 'required' => true, 'type' => 'string' ),
-					'password' => array( 'required' => true, 'type' => 'string' ),
+					'email'    => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'password' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
 				),
 
 			)
 		);
-        register_rest_route(
-	'rms/v1',
-	'/customers/forgot-password',
-	array(
-		'methods'             => 'POST',
-		'callback'            => array( $this, 'request_password_reset' ),
-		'permission_callback' => '__return_true',
-		'args'                => array(
-			'email' => array( 'required' => true, 'type' => 'string' ),
-		),
-	)
-);
+		register_rest_route(
+			'rms/v1',
+			'/customers/forgot-password',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'request_password_reset' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'email' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
 
-register_rest_route(
-	'rms/v1',
-	'/customers/reset-password',
-	array(
-		'methods'             => 'POST',
-		'callback'            => array( $this, 'reset_password' ),
-		'permission_callback' => '__return_true',
-		'args'                => array(
-			'login'    => array( 'required' => true, 'type' => 'string' ),
-			'key'      => array( 'required' => true, 'type' => 'string' ),
-			'password' => array( 'required' => true, 'type' => 'string' ),
-		),
-	)
-   );
-        
-
-
-
+		register_rest_route(
+			'rms/v1',
+			'/customers/reset-password',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'reset_password' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'login'    => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'key'      => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+					'password' => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
 	}
 
 	public function register_customer( $request ) {
@@ -154,77 +180,73 @@ register_rest_route(
 			200
 		);
 	}
-public function request_password_reset( $request ) {
-	$email = sanitize_email( $request->get_param( 'email' ) );
+	public function request_password_reset( $request ) {
+		$email = sanitize_email( $request->get_param( 'email' ) );
 
-	// retrieve_password() is WP core's own "forgot password" function — same one
-	// wp-login.php uses. It looks up the user by email or username, generates a
-	// reset key, and emails the reset link itself. We don't build any of that.
-	$result = retrieve_password( $email );
+		// retrieve_password() is WP core's own "forgot password" function — same one
+		// wp-login.php uses. It looks up the user by email or username, generates a
+		// reset key, and emails the reset link itself. We don't build any of that.
+		$result = retrieve_password( $email );
 
-	// Deliberately return success even if the email doesn't exist — returning an
-	// error here would let someone probe which emails have accounts (the same
-	// enumeration concern as the login error message).
-	if ( is_wp_error( $result ) && 'invalid_email' !== $result->get_error_code() ) {
-		return new WP_Error( 'rms_reset_failed', 'Something went wrong. Please try again.', array( 'status' => 500 ) );
+		// Deliberately return success even if the email doesn't exist — returning an
+		// error here would let someone probe which emails have accounts (the same
+		// enumeration concern as the login error message).
+		if ( is_wp_error( $result ) && 'invalid_email' !== $result->get_error_code() ) {
+			return new WP_Error( 'rms_reset_failed', 'Something went wrong. Please try again.', array( 'status' => 500 ) );
+		}
+
+		return new WP_REST_Response(
+			array( 'message' => 'If an account exists for that email, a reset link has been sent.' ),
+			200
+		);
 	}
 
-	return new WP_REST_Response(
-		array( 'message' => 'If an account exists for that email, a reset link has been sent.' ),
-		200
-	);
-}
+	public function reset_password( $request ) {
+		$login    = sanitize_text_field( $request->get_param( 'login' ) );
+		$key      = sanitize_text_field( $request->get_param( 'key' ) );
+		$password = (string) $request->get_param( 'password' );
 
-public function reset_password( $request ) {
-	$login    = sanitize_text_field( $request->get_param( 'login' ) );
-	$key      = sanitize_text_field( $request->get_param( 'key' ) );
-	$password = (string) $request->get_param( 'password' );
+		if ( strlen( $password ) < 8 ) {
+			return new WP_Error( 'rms_weak_password', 'Password must be at least 8 characters.', array( 'status' => 422 ) );
+		}
 
-	if ( strlen( $password ) < 8 ) {
-		return new WP_Error( 'rms_weak_password', 'Password must be at least 8 characters.', array( 'status' => 422 ) );
+		// check_password_reset_key() validates the key/login pair and returns the
+		// WP_User on success, or a WP_Error (expired_key / invalid_key) on failure.
+		$user = check_password_reset_key( $key, $login );
+
+		if ( is_wp_error( $user ) ) {
+			return new WP_Error( 'rms_invalid_reset_link', 'This reset link is invalid or has expired.', array( 'status' => 400 ) );
+		}
+
+		reset_password( $user, $password );
+
+		// Log them in immediately after a successful reset, same as register/login.
+		wp_set_current_user( $user->ID );
+		wp_set_auth_cookie( $user->ID, true );
+
+		return new WP_REST_Response(
+			array( 'message' => 'Password updated.' ),
+			200
+		);
 	}
+	public function customize_reset_password_email( $message, $key, $user_login, $user_data ) {
+		$reset_url = add_query_arg(
+			array(
+				'rms_action' => 'reset-password',
+				'key'        => rawurlencode( $key ),
+				'login'      => rawurlencode( $user_login ),
+			),
+			home_url( '/customer-portal/' )
+		);
 
-	// check_password_reset_key() validates the key/login pair and returns the
-	// WP_User on success, or a WP_Error (expired_key / invalid_key) on failure.
-	$user = check_password_reset_key( $key, $login );
-
-	if ( is_wp_error( $user ) ) {
-		return new WP_Error( 'rms_invalid_reset_link', 'This reset link is invalid or has expired.', array( 'status' => 400 ) );
+		return sprintf(
+			"Someone has requested a password reset for the following account:\n\nSite Name: %s\nUsername: %s\n\nIf this was a mistake, ignore this email and nothing will happen.\n\nTo reset your password, visit the following address:\n\n%s\n\nThis password reset request originated from the IP address %s.",
+			get_bloginfo( 'name' ),
+			$user_login,
+			esc_url_raw( $reset_url ),
+			$_SERVER['REMOTE_ADDR']
+		);
 	}
-
-	reset_password( $user, $password );
-
-	// Log them in immediately after a successful reset, same as register/login.
-	wp_set_current_user( $user->ID );
-	wp_set_auth_cookie( $user->ID, true );
-
-	return new WP_REST_Response(
-		array( 'message' => 'Password updated.' ),
-		200
-	);
-}
-public function customize_reset_password_email( $message, $key, $user_login, $user_data ) {
-	$reset_url = add_query_arg(
-		array(
-			'rms_action' => 'reset-password',
-			'key'        => rawurlencode( $key ),
-			'login'      => rawurlencode( $user_login ),
-		),
-		home_url( '/customer-portal/' )
-	);
-
-	return sprintf(
-		"Someone has requested a password reset for the following account:\n\nSite Name: %s\nUsername: %s\n\nIf this was a mistake, ignore this email and nothing will happen.\n\nTo reset your password, visit the following address:\n\n%s\n\nThis password reset request originated from the IP address %s.",
-		get_bloginfo( 'name' ),
-		$user_login,
-		esc_url_raw( $reset_url ),
-		$_SERVER['REMOTE_ADDR']
-	);
-}
-
-
-
-
 }
 
 if ( ! function_exists( 'restaurant_management_system_customer_rest_controller' ) ) {

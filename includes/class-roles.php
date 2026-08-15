@@ -55,9 +55,9 @@ class Restaurant_Management_System_Roles {
 			'rms_customer',
 			__( 'Customer', 'restaurant-management-system' ),
 			array(
-				'read'                     => true,
-				'create_rms_orders'        => true,
-				'create_rms_reservations'  => true,
+				'read'                    => true,
+				'create_rms_orders'       => true,
+				'create_rms_reservations' => true,
 			)
 		);
 
@@ -70,11 +70,11 @@ class Restaurant_Management_System_Roles {
 			'rms_staff',
 			__( 'Staff', 'restaurant-management-system' ),
 			array(
-				'read'                       => true,
-				'access_rms_admin'           => true,
-				'manage_rms_orders'          => true,
-				'manage_rms_reservations'    => true,
-				'manage_rms_tables'          => true,
+				'read'                    => true,
+				'access_rms_admin'        => true,
+				'manage_rms_orders'       => true,
+				'manage_rms_reservations' => true,
+				'manage_rms_tables'       => true,
 			)
 		);
 

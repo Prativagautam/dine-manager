@@ -139,11 +139,11 @@ class Restaurant_Management_System_Public {
 			'restaurant_management_system_public_localize',
 			array(
 				'RESTAURANT_MANAGEMENT_SYSTEM_URL' => RESTAURANT_MANAGEMENT_SYSTEM_URL,
-				'site_url'                        => esc_url( home_url() ),
-				'rest_url'                        => get_rest_url(),
-				'nonce'                           => wp_create_nonce( 'wp_rest' ),
-				'is_logged_in'                    => is_user_logged_in(),
-				'login_url'                       => wp_login_url( esc_url_raw( add_query_arg( array(), get_permalink() ) ) ),
+				'site_url'                         => esc_url( home_url() ),
+				'rest_url'                         => get_rest_url(),
+				'nonce'                            => wp_create_nonce( 'wp_rest' ),
+				'is_logged_in'                     => is_user_logged_in(),
+				'login_url'                        => wp_login_url( esc_url_raw( add_query_arg( array(), get_permalink() ) ) ),
 			)
 		);
 

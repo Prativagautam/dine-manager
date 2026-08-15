@@ -223,7 +223,7 @@ class Restaurant_Management_System_Order_Rest_Controller {
 				'type'              => 'string',
 				'required'          => true,
 				'sanitize_callback' => 'sanitize_key',
-				'validate_callback' => function( $value ) {
+				'validate_callback' => function ( $value ) {
 					return in_array( $value, array( 'dine_in', 'takeout' ), true );
 				},
 			),
@@ -231,14 +231,14 @@ class Restaurant_Management_System_Order_Rest_Controller {
 				'type'              => 'string',
 				'required'          => true,
 				'sanitize_callback' => 'sanitize_key',
-				'validate_callback' => function( $value ) {
+				'validate_callback' => function ( $value ) {
 					return in_array( $value, array( 'staff_pos', 'customer_portal' ), true );
 				},
 			),
 			'items'        => array(
 				'type'              => 'array',
 				'required'          => true,
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					return is_array( $value ) ? $value : array();
 				},
 				'validate_callback' => array( $this, 'validate_order_items' ),
@@ -330,7 +330,7 @@ class Restaurant_Management_System_Order_Rest_Controller {
 		if ( $status ) {
 			$args['tax_query'] = array(
 				array(
-					'taxonomy' => 'order_status',            
+					'taxonomy' => 'order_status',
 					'field'    => 'slug',
 					'terms'    => $status,
 				),
@@ -474,6 +474,10 @@ class Restaurant_Management_System_Order_Rest_Controller {
 
 		if ( $next_status !== $current_status ) {
 			wp_set_object_terms( $order->ID, $next_status, 'order_status', false );
+				if ( 'delivered' === $next_status ) {
+		update_post_meta( $order->ID, 'delivered_at', gmdate( DATE_W3C ) );
+	}
+
 		}
 
 		$order_type = get_post_meta( $order->ID, 'order_type', true );
@@ -514,8 +518,8 @@ class Restaurant_Management_System_Order_Rest_Controller {
 	private function resolve_order_items( $requested_items ) {
 		$quantities = array();
 		foreach ( $requested_items as $requested_item ) {
-			$menu_item_id = absint( $requested_item['menu_item_id'] );
-			$quantity     = absint( $requested_item['quantity'] );
+			$menu_item_id                = absint( $requested_item['menu_item_id'] );
+			$quantity                    = absint( $requested_item['quantity'] );
 			$quantities[ $menu_item_id ] = isset( $quantities[ $menu_item_id ] ) ? $quantities[ $menu_item_id ] + $quantity : $quantity;
 		}
 
@@ -540,8 +544,8 @@ class Restaurant_Management_System_Order_Rest_Controller {
 				);
 			}
 
-			$unit_price = (float) get_post_meta( $menu_item_id, 'price', true );
-			$line_total = round( $unit_price * $quantity, 2 );
+			$unit_price  = (float) get_post_meta( $menu_item_id, 'price', true );
+			$line_total  = round( $unit_price * $quantity, 2 );
 			$snapshots[] = array(
 				'menu_item_id' => (int) $menu_item_id,
 				'item_title'   => get_the_title( $menu_item ),
@@ -549,7 +553,7 @@ class Restaurant_Management_System_Order_Rest_Controller {
 				'quantity'     => (int) $quantity,
 				'line_total'   => $line_total,
 			);
-			$total += $line_total;
+			$total      += $line_total;
 		}
 
 		return array(
@@ -570,8 +574,8 @@ class Restaurant_Management_System_Order_Rest_Controller {
 		if ( 'customer_portal' === $order_source && 'takeout' === $order_type ) {
 			return true;
 		}
-		if($is_manager && 'staff_pos' === $order_source) {
-			return in_array($order_type, array('dine_in', 'takeout'), true);
+		if ( $is_manager && 'staff_pos' === $order_source ) {
+			return in_array( $order_type, array( 'dine_in', 'takeout' ), true );
 		}
 		return false;
 	}
@@ -637,6 +641,8 @@ class Restaurant_Management_System_Order_Rest_Controller {
 			'customer_id'  => absint( get_post_meta( $order->ID, 'customer_id', true ) ),
 			'created_by'   => absint( get_post_meta( $order->ID, 'created_by', true ) ),
 			'created_at'   => get_post_time( DATE_W3C, true, $order ),
+		    'delivered_at'   => get_post_time( DATE_W3C, true, $order ),
+
 		);
 	}
 }

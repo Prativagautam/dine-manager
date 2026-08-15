@@ -61,6 +61,8 @@ class Restaurant_Management_System_Post_Types {
 		$this->register_menu_taxonomies();
 		$this->register_order_taxonomy();
 		$this->register_order_status_terms();
+		$this->register_reservation_taxonomy();
+	$this->register_reservation_status_terms();
 	}
 
 	/**
@@ -102,17 +104,17 @@ class Restaurant_Management_System_Post_Types {
 		);
 
 		$args = array(
-			'labels'             => $labels,
-			'public'             => true,
-			'show_ui'            => true,
-			'show_in_menu'       => false, // Managed via the plugin's own React admin screen, not a separate wp-admin CPT list.
-			'show_in_rest'       => true,
-			'rest_base'          => 'rms-menu-items',
+			'labels'                => $labels,
+			'public'                => true,
+			'show_ui'               => true,
+			'show_in_menu'          => false, // Managed via the plugin's own React admin screen, not a separate wp-admin CPT list.
+			'show_in_rest'          => true,
+			'rest_base'             => 'rms-menu-items',
 			'rest_controller_class' => 'WP_REST_Posts_Controller', // Overridden by our custom controller (Part 2) for the public GET endpoint; this keeps core CRUD available too.
-			'supports'           => array( 'title', 'editor', 'thumbnail', 'custom-fields' ), // title = item name, editor = description, thumbnail = image.
-			'has_archive'        => false,
-			'capability_type'    => 'post', // Deliberately plain 'post' capabilities here, NOT the custom RMS capabilities — menu CRUD is gated by 'manage_rms_menu_items' at the REST layer (Part 2), not by CPT-level capabilities. See PLAN.md §6.
-			'map_meta_cap'       => true,
+			'supports'              => array( 'title', 'editor', 'thumbnail', 'custom-fields' ), // title = item name, editor = description, thumbnail = image.
+			'has_archive'           => false,
+			'capability_type'       => 'post', // Deliberately plain 'post' capabilities here, NOT the custom RMS capabilities — menu CRUD is gated by 'manage_rms_menu_items' at the REST layer (Part 2), not by CPT-level capabilities. See PLAN.md §6.
+			'map_meta_cap'          => true,
 		);
 
 		register_post_type( 'menu_item', $args );
@@ -144,16 +146,16 @@ class Restaurant_Management_System_Post_Types {
 		);
 
 		$args = array(
-			'labels'             => $labels,
-			'public'             => true,
-			'show_ui'            => true,
-			'show_in_menu'       => false,
-			'show_in_rest'       => true,
-			'rest_base'          => 'rms-tables',
-			'supports'           => array( 'title', 'custom-fields' ),
-			'has_archive'        => false,
-			'capability_type'    => 'post',
-			'map_meta_cap'       => true,
+			'labels'          => $labels,
+			'public'          => true,
+			'show_ui'         => true,
+			'show_in_menu'    => false,
+			'show_in_rest'    => true,
+			'rest_base'       => 'rms-tables',
+			'supports'        => array( 'title', 'custom-fields' ),
+			'has_archive'     => false,
+			'capability_type' => 'post',
+			'map_meta_cap'    => true,
 		);
 
 		register_post_type( 'table', $args );
@@ -186,15 +188,15 @@ class Restaurant_Management_System_Post_Types {
 		);
 
 		$args = array(
-			'labels'             => $labels,
-			'public'             => false,
-			'show_ui'            => false,
-			'show_in_menu'       => false,
-			'show_in_rest'       => false,
-			'supports'           => array( 'title', 'custom-fields' ),
-			'has_archive'        => false,
-			'capability_type'    => 'post',
-			'map_meta_cap'       => true,
+			'labels'          => $labels,
+			'public'          => false,
+			'show_ui'         => false,
+			'show_in_menu'    => false,
+			'show_in_rest'    => false,
+			'supports'        => array( 'title', 'custom-fields' ),
+			'has_archive'     => false,
+			'capability_type' => 'post',
+			'map_meta_cap'    => true,
 		);
 
 		register_post_type( 'reservation', $args );
@@ -258,7 +260,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'absint',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_reservations' );
 				},
 			)
@@ -273,7 +275,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'absint',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_reservations' );
 				},
 			)
@@ -288,7 +290,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'absint',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_reservations' );
 				},
 			)
@@ -303,7 +305,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_reservations' );
 				},
 			)
@@ -318,7 +320,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_reservations' );
 				},
 			)
@@ -333,7 +335,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_reservations' );
 				},
 			)
@@ -348,12 +350,60 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_reservations' );
 				},
 			)
 		);
 	}
+	/**
+ * Register the reservation lifecycle taxonomy.
+ *
+ * Same reasoning as order_status: a taxonomy so reservation lists can be
+ * queried/filtered by status. Reservations are auto-confirmed at creation
+ * (validation already happens server-side), so 'confirmed' is the default
+ * term rather than 'pending' — there is no unconfirmed state.
+ *
+ * @access private
+ * @since 1.0.0
+ */
+private function register_reservation_taxonomy() {
+	register_taxonomy(
+		'reservation_status',
+		'reservation',
+		array(
+			'labels'       => array(
+				'name'          => __( 'Reservation Statuses', 'restaurant-management-system' ),
+				'singular_name' => __( 'Reservation Status', 'restaurant-management-system' ),
+			),
+			'hierarchical' => false,
+			'public'       => false,
+			'show_ui'      => false,
+			'show_in_rest' => false,
+		),
+	);
+}
+
+/**
+ * Ensure the fixed reservation lifecycle terms exist.
+ *
+ * @access private
+ * @since 1.0.0
+ */
+private function register_reservation_status_terms() {
+	$statuses = array(
+		'confirmed' => __( 'Confirmed', 'restaurant-management-system' ),
+		'completed' => __( 'Completed', 'restaurant-management-system' ),
+		'cancelled' => __( 'Cancelled', 'restaurant-management-system' ),
+		'no_show'   => __( 'No Show', 'restaurant-management-system' ),
+	);
+
+	foreach ( $statuses as $slug => $name ) {
+		if ( ! term_exists( $slug, 'reservation_status' ) ) {
+			wp_insert_term( $name, 'reservation_status', array( 'slug' => $slug ) );
+		}
+	}
+}
 
 	/**
 	 * Register menu_category (hierarchical) and dietary_tag (flat) taxonomies.
@@ -465,10 +515,10 @@ class Restaurant_Management_System_Post_Types {
 				'description'       => __( 'Price in the site currency.', 'restaurant-management-system' ),
 				'single'            => true,
 				'show_in_rest'      => true,
-				'sanitize_callback' => function( $meta_value ) {
-			return floatval( $meta_value );
-		},
-				'auth_callback'     => function() {
+				'sanitize_callback' => function ( $meta_value ) {
+					return floatval( $meta_value );
+				},
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_menu_items' );
 				},
 			)
@@ -483,7 +533,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'absint',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_menu_items' );
 				},
 			)
@@ -499,7 +549,7 @@ class Restaurant_Management_System_Post_Types {
 				'default'           => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'rest_sanitize_boolean',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_menu_items' );
 				},
 			)
@@ -522,7 +572,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'absint',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_tables' );
 				},
 			)
@@ -537,7 +587,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'sanitize_text_field',
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_tables' );
 				},
 			)
@@ -553,10 +603,10 @@ class Restaurant_Management_System_Post_Types {
 				'default'           => 'Available',
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'sanitize_text_field',
-				'validate_callback' => function( $value ) {
+				'validate_callback' => function ( $value ) {
 					return in_array( $value, array( 'Available', 'Occupied', 'Reserved' ), true );
 				},
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_tables' );
 				},
 			)
@@ -571,7 +621,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'absint',
-				'validate_callback' => function( $value ) {
+				'validate_callback' => function ( $value ) {
 					if ( ! is_numeric( $value ) ) {
 						return false;
 					}
@@ -579,7 +629,7 @@ class Restaurant_Management_System_Post_Types {
 					$int_value = (int) $value;
 					return $int_value >= 0 && $int_value <= 11;
 				},
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_tables' );
 				},
 			)
@@ -594,7 +644,7 @@ class Restaurant_Management_System_Post_Types {
 				'single'            => true,
 				'show_in_rest'      => true,
 				'sanitize_callback' => 'absint',
-				'validate_callback' => function( $value ) {
+				'validate_callback' => function ( $value ) {
 					if ( ! is_numeric( $value ) ) {
 						return false;
 					}
@@ -602,7 +652,7 @@ class Restaurant_Management_System_Post_Types {
 					$int_value = (int) $value;
 					return $int_value >= 0 && $int_value <= 11;
 				},
-				'auth_callback'     => function() {
+				'auth_callback'     => function () {
 					return current_user_can( 'manage_rms_tables' );
 				},
 			)
@@ -648,6 +698,10 @@ class Restaurant_Management_System_Post_Types {
 				'type'        => 'integer',
 				'description' => __( 'WordPress user who created the order.', 'restaurant-management-system' ),
 			),
+			'delivered_at' => array(
+		'type'        => 'string',
+		'description' => __( 'UTC ISO 8601 timestamp when the order was marked delivered.', 'restaurant-management-system' ),
+	),  
 		);
 
 		foreach ( $meta_fields as $meta_key => $meta ) {
@@ -656,7 +710,7 @@ class Restaurant_Management_System_Post_Types {
 			// function it rejects those additional arguments, which turns saving an
 			// order total into a fatal error on PHP 8+.
 			$sanitize_callback = 'total_amount' === $meta_key
-				? function( $value ) {
+				? function ( $value ) {
 					return (float) $value;
 				}
 				: ( in_array( $meta_key, array( 'table_id', 'customer_id', 'created_by' ), true ) ? 'absint' : 'sanitize_text_field' );
@@ -670,7 +724,7 @@ class Restaurant_Management_System_Post_Types {
 					'single'            => true,
 					'show_in_rest'      => true,
 					'sanitize_callback' => $sanitize_callback,
-					'auth_callback'     => function() {
+					'auth_callback'     => function () {
 						return current_user_can( 'manage_rms_orders' );
 					},
 				)

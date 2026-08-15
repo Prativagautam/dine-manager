@@ -102,6 +102,36 @@ class Restaurant_Management_System_Reservation_Rest_Controller {
 				),
 			)
 		);
+		register_rest_route(
+	$this->namespace,
+	'/' . $this->rest_base . '/(?P<id>[\d]+)',
+	array(
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_item' ),
+			'permission_callback' => array( $this, 'get_item_permissions_check' ),
+			'args'                => array(
+				'id' => array(
+					'required'          => true,
+					'sanitize_callback' => 'absint',
+				),
+			),
+		),
+		array(
+			'methods'             => WP_REST_Server::EDITABLE,
+			'callback'            => array( $this, 'update_item' ),
+			'permission_callback' => array( $this, 'update_item_permissions_check' ),
+			'args'                => array(
+				'status' => array(
+					'type'              => 'string',
+					'required'          => true,
+					'sanitize_callback' => 'sanitize_key',
+					'validate_callback' => array( $this, 'validate_reservation_status' ),
+				),
+			),
+		),
+	)
+   );
 	}
 
 	/**
@@ -172,7 +202,7 @@ class Restaurant_Management_System_Reservation_Rest_Controller {
 	 */
 	private function get_item_args() {
 		return array(
-			'table_id'      => array(
+			'table_id'       => array(
 				'type'              => 'integer',
 				'required'          => true,
 				'sanitize_callback' => 'absint',
@@ -204,6 +234,8 @@ class Restaurant_Management_System_Reservation_Rest_Controller {
 			),
 		);
 	}
+
+
 
 	/**
 	 * Handle GET /rms/v1/reservations.
@@ -270,6 +302,92 @@ class Restaurant_Management_System_Reservation_Rest_Controller {
 
 		return rest_ensure_response( $this->prepare_item_for_response( $post ) );
 	}
+	/**
+ * Only Staff and Administrators can change a reservation's status.
+ *
+ * @param WP_REST_Request $request Request data.
+ * @return bool|WP_Error
+ */
+public function update_item_permissions_check( $request ) {
+	if ( ! current_user_can( 'manage_rms_reservations' ) ) {
+		return new WP_Error(
+			'rest_forbidden',
+			__( 'You cannot update this reservation.', 'restaurant-management-system' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	$reservation_id = absint( $request->get_param( 'id' ) );
+	$post            = get_post( $reservation_id );
+
+	if ( ! $post || 'reservation' !== $post->post_type ) {
+		return new WP_Error(
+			'rest_reservation_not_found',
+			__( 'Reservation not found.', 'restaurant-management-system' ),
+			array( 'status' => 404 )
+		);
+	}
+
+	return true;
+}
+
+/**
+ * Validate a reservation lifecycle status slug.
+ *
+ * @param string $value Status slug.
+ * @return bool
+ */
+public function validate_reservation_status( $value ) {
+	return in_array( $value, array( 'confirmed', 'completed', 'cancelled', 'no_show' ), true );
+}
+
+/**
+ * Advance a reservation through its permitted status transitions.
+ *
+ * All three terminal states (completed, cancelled, no_show) are only
+ * reachable from 'confirmed' — there is no path back, matching Order's
+ * one-directional lifecycle model.
+ *
+ * @param WP_REST_Request $request Request data.
+ * @return WP_REST_Response|WP_Error
+ */
+public function update_item( $request ) {
+	$reservation_id = absint( $request->get_param( 'id' ) );
+	$current_status = $this->get_reservation_status( $reservation_id );
+	$next_status    = $request->get_param( 'status' );
+
+	$transitions = array(
+		'confirmed' => array( 'completed', 'cancelled', 'no_show' ),
+		'completed' => array(),
+		'cancelled' => array(),
+		'no_show'   => array(),
+	);
+
+	if ( $next_status !== $current_status && ! in_array( $next_status, $transitions[ $current_status ], true ) ) {
+		return new WP_Error(
+			'rest_reservation_invalid_transition',
+			__( 'This reservation cannot move to the requested status.', 'restaurant-management-system' ),
+			array( 'status' => 409 )
+		);
+	}
+
+	if ( $next_status !== $current_status ) {
+		wp_set_object_terms( $reservation_id, $next_status, 'reservation_status', false );
+	}
+
+	return rest_ensure_response( $this->prepare_item_for_response( get_post( $reservation_id ) ) );
+}
+
+/**
+ * Return a reservation's current lifecycle slug.
+ *
+ * @param int $reservation_id Reservation ID.
+ * @return string
+ */
+private function get_reservation_status( $reservation_id ) {
+	$terms = wp_get_post_terms( $reservation_id, 'reservation_status', array( 'fields' => 'slugs' ) );
+	return ! is_wp_error( $terms ) && ! empty( $terms ) ? $terms[0] : 'confirmed';
+}
 
 	/**
 	 * Handle POST /rms/v1/reservations.
@@ -359,6 +477,7 @@ class Restaurant_Management_System_Reservation_Rest_Controller {
 		update_post_meta( $reservation_id, 'end_datetime', $end->format( DATE_W3C ) );
 		update_post_meta( $reservation_id, 'contact_name', $contact_name );
 		update_post_meta( $reservation_id, 'contact_phone', $contact_phone );
+		wp_set_object_terms( $reservation_id, 'confirmed', 'reservation_status', false );
 
 		return rest_ensure_response( $this->prepare_item_for_response( get_post( $reservation_id ) ) );
 	}
@@ -407,9 +526,9 @@ class Restaurant_Management_System_Reservation_Rest_Controller {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int                $table_id Table ID.
-	 * @param DateTimeImmutable  $start    Requested UTC start.
-	 * @param DateTimeImmutable  $end      Requested UTC end.
+	 * @param int               $table_id Table ID.
+	 * @param DateTimeImmutable $start    Requested UTC start.
+	 * @param DateTimeImmutable $end      Requested UTC end.
 	 * @return bool
 	 */
 	private function has_conflicting_reservation( $table_id, $start, $end ) {
@@ -457,6 +576,7 @@ class Restaurant_Management_System_Reservation_Rest_Controller {
 			'id'             => $post->ID,
 			'title'          => get_the_title( $post ),
 			'table_id'       => absint( get_post_meta( $post->ID, 'table_id', true ) ),
+			'status'         => $this->get_reservation_status( $post->ID ),
 			'customer_id'    => absint( get_post_meta( $post->ID, 'customer_id', true ) ),
 			'party_size'     => absint( get_post_meta( $post->ID, 'party_size', true ) ),
 			'start_datetime' => get_post_meta( $post->ID, 'start_datetime', true ),

@@ -36,8 +36,8 @@ class Restaurant_Management_System_Deactivator {
 	public static function deactivate() {
 			require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-roles.php';
 
-	$roles = new Restaurant_Management_System_Roles();
-	$roles->remove_roles_and_capabilities();
+		$roles = new Restaurant_Management_System_Roles();
+		$roles->remove_roles_and_capabilities();
 		if ( restaurant_management_system_get_options( 'deleteAll' ) ) {
 			delete_option( RESTAURANT_MANAGEMENT_SYSTEM_OPTION_NAME );
 		}

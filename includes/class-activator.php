@@ -36,9 +36,9 @@ class Restaurant_Management_System_Activator {
 	public static function activate() {
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-roles.php';
 
-	$roles = new Restaurant_Management_System_Roles();
-	$roles->add_roles_and_capabilities();
+		$roles = new Restaurant_Management_System_Roles();
+		$roles->add_roles_and_capabilities();
 
-	flush_rewrite_rules();
+		flush_rewrite_rules();
 	}
 }

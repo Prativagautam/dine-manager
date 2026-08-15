@@ -127,8 +127,7 @@ class Restaurant_Management_System {
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-reservation-rest-controller.php';
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-order-rest-controller.php';
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-customer-rest-controller.php';
-
-
+        require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-dashboard-rest-controller.php';
 		$this->loader = new Restaurant_Management_System_Loader();
 	}
 
@@ -166,7 +165,7 @@ class Restaurant_Management_System {
 		$this->loader->add_action( 'init', $plugin_post_types, 'register_taxonomies' );
 		$this->loader->add_action( 'init', $plugin_post_types, 'register_meta_fields' );
 	}
-	
+
 
 	/**
 	 * Register all of the hooks related to the admin area functionality
@@ -217,11 +216,11 @@ class Restaurant_Management_System {
 
 		$plugin_order_rest = restaurant_management_system_order_rest_controller();
 		$this->loader->add_action( 'rest_api_init', $plugin_order_rest, 'register_routes' );
-
+        $plugin_dashboard_rest = restaurant_management_system_dashboard_rest_controller();
+        $this->loader->add_action( 'rest_api_init', $plugin_dashboard_rest, 'register_routes' );
 		$plugin_customer_rest = restaurant_management_system_customer_rest_controller();
 		$this->loader->add_action( 'rest_api_init', $plugin_customer_rest, 'register_routes' );
 		$this->loader->add_filter( 'retrieve_password_message', $plugin_customer_rest, 'customize_reset_password_email', 10, 4 );
-
 	}
 
 	/**

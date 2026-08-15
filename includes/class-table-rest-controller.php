@@ -62,7 +62,7 @@ class Restaurant_Management_System_Table_Rest_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_customer_tables' ),
-				'permission_callback' => function() {
+				'permission_callback' => function () {
 					return current_user_can( 'create_rms_reservations' ) || current_user_can( 'manage_rms_reservations' );
 				},
 			)
@@ -75,17 +75,17 @@ class Restaurant_Management_System_Table_Rest_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => function() {
+					'permission_callback' => function () {
 						return current_user_can( 'manage_rms_tables' );
 					},
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
-					'permission_callback' => function() {
+					'permission_callback' => function () {
 						return current_user_can( 'manage_rms_tables' );
 					},
-					'args'                => $this->get_item_args(),
+					'args'                => $this->get_create_item_args(),
 				),
 			)
 		);
@@ -97,15 +97,15 @@ class Restaurant_Management_System_Table_Rest_Controller {
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => function() {
+					'permission_callback' => function () {
 						return current_user_can( 'manage_rms_tables' );
 					},
-					'args'                => $this->get_item_args(),
+					'args'                => $this->get_update_item_args(),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
-					'permission_callback' => function() {
+					'permission_callback' => function () {
 						return current_user_can( 'manage_rms_tables' );
 					},
 				),
@@ -114,11 +114,11 @@ class Restaurant_Management_System_Table_Rest_Controller {
 	}
 
 	/**
-	 * Return the table item args shared by create and update.
+	 * Table args for creation — title is required, everything else optional.
 	 *
 	 * @return array
 	 */
-	private function get_item_args() {
+	private function get_create_item_args() {
 		return array(
 			'title'    => array(
 				'type'              => 'string',
@@ -128,7 +128,7 @@ class Restaurant_Management_System_Table_Rest_Controller {
 			'status'   => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
-				'validate_callback' => function( $value, $request, $key ) {
+				'validate_callback' => function ( $value, $request, $key ) {
 					return in_array( $value, array( 'Available', 'Occupied', 'Out of Service' ), true );
 				},
 			),
@@ -143,7 +143,7 @@ class Restaurant_Management_System_Table_Rest_Controller {
 			'grid_x'   => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
-				'validate_callback' => function( $value, $request, $key ) {
+				'validate_callback' => function ( $value, $request, $key ) {
 					if ( ! is_numeric( $value ) ) {
 						return false;
 					}
@@ -155,7 +155,63 @@ class Restaurant_Management_System_Table_Rest_Controller {
 			'grid_y'   => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
-				'validate_callback' => function( $value, $request, $key ) {
+				'validate_callback' => function ( $value, $request, $key ) {
+					if ( ! is_numeric( $value ) ) {
+						return false;
+					}
+
+					$int_value = (int) $value;
+					return $int_value >= 0 && $int_value <= 11;
+				},
+			),
+		);
+	}
+
+	/**
+	 * Table args for updates — every field optional, since update_item()
+	 * already supports partial updates (only the fields present are
+	 * written). title must NOT be required here, or a drag-only PATCH
+	 * sending just grid_x/grid_y is rejected before update_item() runs.
+	 *
+	 * @return array
+	 */
+	private function get_update_item_args() {
+		return array(
+			'title'    => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'status'   => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => function ( $value, $request, $key ) {
+					return in_array( $value, array( 'Available', 'Occupied', 'Out of Service' ), true );
+				},
+			),
+			'capacity' => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'section'  => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'grid_x'   => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => function ( $value, $request, $key ) {
+					if ( ! is_numeric( $value ) ) {
+						return false;
+					}
+
+					$int_value = (int) $value;
+					return $int_value >= 0 && $int_value <= 11;
+				},
+			),
+			'grid_y'   => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => function ( $value, $request, $key ) {
 					if ( ! is_numeric( $value ) ) {
 						return false;
 					}
@@ -377,7 +433,12 @@ class Restaurant_Management_System_Table_Rest_Controller {
 			);
 		}
 
-		return rest_ensure_response( array( 'deleted' => true, 'id' => $table_id ) );
+		return rest_ensure_response(
+			array(
+				'deleted' => true,
+				'id'      => $table_id,
+			)
+		);
 	}
 
 	/**

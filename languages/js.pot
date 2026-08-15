@@ -3,30 +3,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "X-Generator: babel-plugin-makepot\n"
 
-#: src/admin/components/organisms/sidebar.js:35
-msgid "Dashboard"
+#: src/admin/components/organisms/require-capability.js:29
+msgid "Access restricted"
 msgstr ""
 
-#: src/admin/components/organisms/sidebar.js:36
-msgid "Menu"
+#: src/admin/components/organisms/require-capability.js:30
+msgid "You don't have permission to view this page."
 msgstr ""
 
-#: src/admin/components/organisms/sidebar.js:37
-msgid "Tables"
-msgstr ""
-
-#: src/admin/components/organisms/sidebar.js:38
-msgid "Reservations"
-msgstr ""
-
-#: src/admin/components/organisms/sidebar.js:39
-msgid "Orders"
-msgstr ""
-
-#: src/admin/components/organisms/sidebar.js:40
-msgid "Floor Plan"
-msgstr ""
-
-#: src/admin/components/organisms/sidebar.js:47
-msgid "Settings"
+#: src/admin/components/organisms/require-capability.js:33
+msgid "Back to Dashboard"
 msgstr ""

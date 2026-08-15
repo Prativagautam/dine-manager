@@ -100,7 +100,6 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 				),
 			)
 		);
-		
 
 		register_rest_route(
 			$this->namespace,
@@ -145,7 +144,7 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 			'price'             => array(
 				'type'              => 'number',
 				'required'          => $required,
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					return floatval( $value );
 				},
 			),
@@ -163,7 +162,7 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 				'type'              => 'array',
 				'required'          => false,
 				'items'             => array( 'type' => 'string' ),
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					return is_array( $value ) ? array_map( 'sanitize_text_field', $value ) : array();
 				},
 			),
@@ -171,7 +170,7 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 				'type'              => 'array',
 				'required'          => false,
 				'items'             => array( 'type' => 'string' ),
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					return is_array( $value ) ? array_map( 'sanitize_text_field', $value ) : array();
 				},
 			),
@@ -386,17 +385,17 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 			'post_status'    => 'publish',
 			'posts_per_page' => $request->get_param( 'per_page' ),
 			'paged'          => $request->get_param( 'page' ),
-			
+
 		);
 		if ( ! current_user_can( 'manage_rms_menu_items' ) ) {
 	// phpcs:ignore WordPress.DB.SlowDBQuery -- small dataset, acceptable for Phase 1 scope per PLAN.md §1.
-	    $args['meta_query'] = array(
-		array(
-			'key'     => 'is_available',
-			'value'   => '1',
-			'compare' => '=',
-		),
-	); }
+			$args['meta_query'] = array(
+				array(
+					'key'     => 'is_available',
+					'value'   => '1',
+					'compare' => '=',
+				),
+			); }
 
 		$tax_query = array();
 
@@ -463,11 +462,11 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 			'menu_category'      => is_wp_error( $categories ) ? array() : $categories,
 			'dietary_tag'        => is_wp_error( $tags ) ? array() : $tags,
 			'featured_image_url' => get_the_post_thumbnail_url( $post->ID, 'medium' ) ?: null,
-			'is_available' => '1' === (string) get_post_meta(
-	$post->ID,
-	'is_available',
-	true
-),
+			'is_available'       => '1' === (string) get_post_meta(
+				$post->ID,
+				'is_available',
+				true
+			),
 		);
 	}
 }
