@@ -128,6 +128,11 @@ class Restaurant_Management_System {
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-order-rest-controller.php';
 		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-customer-rest-controller.php';
         require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-dashboard-rest-controller.php';
+
+		/**
+		 * The class responsible for registering Gutenberg blocks.
+		 */
+		require_once RESTAURANT_MANAGEMENT_SYSTEM_PATH . 'includes/class-blocks.php';
 		$this->loader = new Restaurant_Management_System_Loader();
 	}
 
@@ -164,6 +169,9 @@ class Restaurant_Management_System {
 		$this->loader->add_action( 'init', $plugin_post_types, 'register_post_types' );
 		$this->loader->add_action( 'init', $plugin_post_types, 'register_taxonomies' );
 		$this->loader->add_action( 'init', $plugin_post_types, 'register_meta_fields' );
+
+		$plugin_blocks = restaurant_management_system_blocks();
+		$this->loader->add_action( 'init', $plugin_blocks, 'register_blocks' );
 	}
 
 

@@ -1,0 +1,47 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "rms/account-menu",
+	"title": "Account Menu",
+	"category": "theme",
+	"icon": "admin-users",
+	"description": "A profile icon that toggles a dropdown with sign-in or account links.",
+	"supports": {
+		"align": false,
+		"html": false,
+		"color": {
+			"text": true,
+			"background": true,
+			"link": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"border": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
+		},
+		"shadow": true
+	},
+	"attributes": {
+		"isLoggedIn": {
+			"type": "boolean",
+			"default": false
+		},
+		"iconStyle": {
+			"type": "string",
+			"default": "outline",
+			"enum": ["outline", "filled"]
+		}
+	},
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style-index.css"
+}
