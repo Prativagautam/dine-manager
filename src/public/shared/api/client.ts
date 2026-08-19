@@ -3,6 +3,7 @@ declare const RestaurantManagementSystemLocalize: {
 	nonce: string;
 	is_logged_in: boolean;
 	login_url: string;
+	site_url: string;
 };
 
 export const portalConfig = RestaurantManagementSystemLocalize;

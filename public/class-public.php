@@ -38,6 +38,16 @@ class Restaurant_Management_System_Public {
 		add_shortcode( 'restaurant_customer_portal', array( $this, 'render_customer_portal' ) );
 		add_shortcode( 'restaurant_order_form', array( $this, 'render_order_portal' ) );
 		add_shortcode( 'restaurant_reservation_form', array( $this, 'render_reservation_portal' ) );
+		add_shortcode( 'restaurant_menu', array( $this, 'render_menu_display' ) );
+	}
+
+	/**
+	 * Render the public menu display.
+	 *
+	 * @return string
+	 */
+	public function render_menu_display() {
+		return '<div class="rms-menu-display"></div>';
 	}
 
 	/**
@@ -115,6 +125,12 @@ class Restaurant_Management_System_Public {
 		wp_style_add_data( 'atomic', 'rtl', 'replace' );
 
 		$version = RESTAURANT_MANAGEMENT_SYSTEM_VERSION;
+		wp_enqueue_style(
+    'rms-google-fonts',
+    'https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;500;600&display=swap',
+    array(),
+    null
+);
 
 		wp_enqueue_style( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME, RESTAURANT_MANAGEMENT_SYSTEM_URL . 'build/public/index.css', array(), $version );
 		wp_style_add_data( RESTAURANT_MANAGEMENT_SYSTEM_PLUGIN_NAME, 'rtl', 'replace' );

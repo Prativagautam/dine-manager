@@ -2,3 +2,21 @@
 	max-width: 1080px;
 	margin: 2rem auto;
 }
+
+.rms-menu-display {
+	max-width: 1080px;
+	margin: 2rem auto;
+}
+
+.rms-menu-item-description {
+	font-size: 0.875rem;
+	color: var(--mantine-color-dimmed);
+
+	p {
+		margin: 0 0 0.5em;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+}
