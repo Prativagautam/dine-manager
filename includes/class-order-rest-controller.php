@@ -394,7 +394,16 @@ class Restaurant_Management_System_Order_Rest_Controller {
 					array( 'status' => 422 )
 				);
 			}
-		} else {
+		} 
+		$table_status = get_post_meta( $table_id, 'status', true );
+if ( 'Out of Service' === $table_status ) {
+    return new WP_Error(
+        'rest_table_out_of_service',
+        __( 'This table is currently out of service and cannot accept orders.', 'restaurant-management-system' ),
+        array( 'status' => 409 )
+    );
+}
+		else {
 			$table_id = 0;
 		}
 

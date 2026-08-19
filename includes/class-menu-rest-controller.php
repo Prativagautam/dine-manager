@@ -76,6 +76,12 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 							'required'          => false,
 							'sanitize_callback' => 'sanitize_title',
 						),
+						'featured'      => array(
+		'description'       => __( 'If true, only return featured (best-selling) items.', 'restaurant-management-system' ),
+		'type'              => 'boolean',
+		'required'          => false,
+		'sanitize_callback' => 'rest_sanitize_boolean',
+	),
 						'page'          => array(
 							'description'       => __( 'Page number for pagination.', 'restaurant-management-system' ),
 							'type'              => 'integer',
@@ -158,6 +164,11 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 				'required'          => false,
 				'sanitize_callback' => 'rest_sanitize_boolean',
 			),
+			'is_featured'       => array(
+	'type'              => 'boolean',
+	'required'          => false,
+	'sanitize_callback' => 'rest_sanitize_boolean',
+),
 			'menu_category'     => array(
 				'type'              => 'array',
 				'required'          => false,
@@ -185,18 +196,24 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 	public function create_item_permissions_check() {
 		return current_user_can( 'manage_rms_menu_items' );
 	}
-
 	/**
-	 * Only staff/admins with manage_rms_menu_items can edit menu items.
-	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return bool|WP_Error
 	 */
-	public function update_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_rms_menu_items' ) ) {
+     public function update_item_permissions_check( $request ) {
+	if ( current_user_can( 'manage_rms_menu_items' ) ) {
+		$item = $this->get_menu_item( $request->get_param( 'id' ) );
+		return is_wp_error( $item ) ? $item : true;
+	}
+
+	if ( current_user_can( 'view_rms_menu_items' ) ) {
+		$submitted_fields = array_keys( (array) $request->get_json_params() );
+		$disallowed_fields = array_diff( $submitted_fields, array( 'is_available' ) );
+
+		if ( ! empty( $disallowed_fields ) ) {
 			return new WP_Error(
 				'rest_forbidden',
-				__( 'You cannot edit menu items.', 'restaurant-management-system' ),
+				__( 'You can only update item availability.', 'restaurant-management-system' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -204,6 +221,13 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 		$item = $this->get_menu_item( $request->get_param( 'id' ) );
 		return is_wp_error( $item ) ? $item : true;
 	}
+
+	return new WP_Error(
+		'rest_forbidden',
+		__( 'You cannot edit menu items.', 'restaurant-management-system' ),
+		array( 'status' => 403 )
+	);
+}
 
 	/**
 	 * Only staff/admins with manage_rms_menu_items can delete menu items.
@@ -328,6 +352,9 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 		if ( $is_create || $request->has_param( 'is_available' ) ) {
 			update_post_meta( $post_id, 'is_available', $request->has_param( 'is_available' ) ? $request->get_param( 'is_available' ) : true );
 		}
+		if ( $is_create || $request->has_param( 'is_featured' ) ) {
+	update_post_meta( $post_id, 'is_featured', $request->has_param( 'is_featured' ) ? $request->get_param( 'is_featured' ) : false );
+}
 		if ( $is_create || $request->has_param( 'menu_category' ) ) {
 			wp_set_object_terms( $post_id, (array) $request->get_param( 'menu_category' ), 'menu_category', false );
 		}
@@ -387,15 +414,28 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 			'paged'          => $request->get_param( 'page' ),
 
 		);
-		if ( ! current_user_can( 'manage_rms_menu_items' ) ) {
+		$meta_query = array();
+
+if ( ! current_user_can( 'manage_rms_menu_items' ) ) {
+	$meta_query[] = array(
+		'key'     => 'is_available',
+		'value'   => '1',
+		'compare' => '=',
+	);
+}
+
+if ( $request->get_param( 'featured' ) ) {
+	$meta_query[] = array(
+		'key'     => 'is_featured',
+		'value'   => '1',
+		'compare' => '=',
+	);
+}
+
+if ( ! empty( $meta_query ) ) {
 	// phpcs:ignore WordPress.DB.SlowDBQuery -- small dataset, acceptable for Phase 1 scope per PLAN.md §1.
-			$args['meta_query'] = array(
-				array(
-					'key'     => 'is_available',
-					'value'   => '1',
-					'compare' => '=',
-				),
-			); }
+	$args['meta_query'] = $meta_query;
+}
 
 		$tax_query = array();
 
@@ -467,6 +507,11 @@ class Restaurant_Management_System_Menu_Rest_Controller {
 				'is_available',
 				true
 			),
+			'is_featured'        => '1' === (string) get_post_meta(
+	$post->ID,
+	'is_featured',
+	true
+),
 		);
 	}
 }

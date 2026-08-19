@@ -438,6 +438,15 @@ private function get_reservation_status( $reservation_id ) {
 			);
 		}
 
+		$table_status = get_post_meta( $table_id, 'status', true );
+		if ( 'Out of Service' === $table_status ) {
+			return new WP_Error(
+				'rest_table_unavailable',
+				__( 'This table is not currently available for booking.', 'restaurant-management-system' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$end = $start->modify( '+90 minutes' );
 
 		if ( $this->has_conflicting_reservation( $table_id, $start, $end ) ) {

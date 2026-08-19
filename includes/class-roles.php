@@ -72,9 +72,11 @@ class Restaurant_Management_System_Roles {
 			array(
 				'read'                    => true,
 				'access_rms_admin'        => true,
+				'view_rms_menu_items'     => true, 
 				'manage_rms_orders'       => true,
 				'manage_rms_reservations' => true,
 				'manage_rms_tables'       => true,
+
 			)
 		);
 
@@ -87,6 +89,7 @@ class Restaurant_Management_System_Roles {
 		$admin = get_role( 'administrator' );
 		if ( $admin ) {
 			$admin->add_cap( 'access_rms_admin' );
+			$admin->add_cap( 'view_rms_menu_items' ); 
 			$admin->add_cap( 'manage_rms_menu_items' );
 			$admin->add_cap( 'manage_rms_orders' );
 			$admin->add_cap( 'manage_rms_reservations' );
@@ -110,6 +113,7 @@ class Restaurant_Management_System_Roles {
 		$admin = get_role( 'administrator' );
 		if ( $admin ) {
 			$admin->remove_cap( 'access_rms_admin' );
+			$admin->add_cap( 'view_rms_menu_items' ); 
 			$admin->remove_cap( 'manage_rms_menu_items' );
 			$admin->remove_cap( 'manage_rms_orders' );
 			$admin->remove_cap( 'manage_rms_reservations' );

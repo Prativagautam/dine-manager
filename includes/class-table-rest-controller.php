@@ -263,6 +263,13 @@ class Restaurant_Management_System_Table_Rest_Controller {
 				'posts_per_page' => -1,
 				'orderby'        => 'menu_order',
 				'order'          => 'ASC',
+				'meta_query'     => array(
+					array(
+						'key'     => 'status',
+						'value'   => 'Out of Service',
+						'compare' => '!=',
+					),
+				),
 			)
 		);
 

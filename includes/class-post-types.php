@@ -496,7 +496,7 @@ private function register_reservation_status_terms() {
 	}
 
 	/**
-	 * Register menu_item meta fields: price, prep_time_minutes, is_available.
+	 * Register menu_item meta fields: price, prep_time_minutes, is_available, is_featured .
 	 *
 	 * All three registered with show_in_rest so they're readable/writable
 	 * via the standard REST meta mechanism as well as our custom
@@ -554,7 +554,25 @@ private function register_reservation_status_terms() {
 				},
 			)
 		);
+		register_post_meta(
+	'menu_item',
+	'is_featured',
+	array(
+		'type'              => 'boolean',
+		'description'       => __( 'Whether this item is highlighted as a best-selling/featured dish.', 'restaurant-management-system' ),
+		'single'            => true,
+		'default'           => false,
+		'show_in_rest'      => true,
+		'sanitize_callback' => 'rest_sanitize_boolean',
+		'auth_callback'     => function () {
+			return current_user_can( 'manage_rms_menu_items' );
+		},
+	)
+);
 	}
+	
+
+
 
 	/**
 	 * Register table meta fields: capacity, section, status, grid_x, grid_y.
