@@ -58,7 +58,7 @@ const AdminRoutes = () => {
                 exact
                 path="/menu"
                 element={
-                  <RequireCapability capability="manage_rms_menu_items">
+                  <RequireCapability capability="view_rms_menu_items">
                     <MenuManagement />
                   </RequireCapability>
                 }

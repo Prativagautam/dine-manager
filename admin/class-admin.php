@@ -174,6 +174,7 @@ class Restaurant_Management_System_Admin {
 				'rest_url'     => get_rest_url(),
 				'white_label'  => restaurant_management_system_include()->get_white_label(),
 				'capabilities' => array(
+					'view_rms_menu_items'     => current_user_can( 'view_rms_menu_items' ),
 					'manage_rms_menu_items'   => current_user_can( 'manage_rms_menu_items' ),
 					'manage_rms_orders'       => current_user_can( 'manage_rms_orders' ),
 					'manage_rms_reservations' => current_user_can( 'manage_rms_reservations' ),

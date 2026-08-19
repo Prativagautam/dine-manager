@@ -35,6 +35,7 @@ const EMPTY_FORM_VALUES = {
   price: 0,
   prep_time_minutes: 0,
   is_available: true,
+  is_featured: false,
   menu_category: [],
   dietary_tag: [],
 };
@@ -53,12 +54,14 @@ const itemToFormValues = (item) => ({
   price: item.price,
   prep_time_minutes: item.prep_time_minutes,
   is_available: item.is_available,
+  is_featured: item.is_featured,
   menu_category: item.menu_category,
   dietary_tag: item.dietary_tag,
 });
 
 const MenuManagement = () => {
   const theme = useMantineTheme();
+  const canManage =RestaurantManagementSystemLocalize.capabilities?.manage_rms_menu_items;
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -322,6 +325,7 @@ const MenuManagement = () => {
             color="brand"
             onClick={() => openEditForm(item)}
             aria-label="Edit menu item"
+            disabled={!canManage}
           >
             <Pencil size={16} />
           </ActionIcon>
@@ -330,6 +334,7 @@ const MenuManagement = () => {
             color="attention"
             onClick={() => setDeleteTarget(item)}
             aria-label="Delete menu item"
+            disabled={!canManage}
           >
             <Trash2 size={16} />
           </ActionIcon>
@@ -370,7 +375,7 @@ const MenuManagement = () => {
               Configure and monitor your restaurant's digital menu items.
             </Text>
           </div>
-          <Button color="brand" radius="lg" onClick={openCreateForm}>
+          <Button color="brand" radius="lg" onClick={openCreateForm} disabled={!canManage}>
             + Add Menu Item
           </Button>
         </Group>
